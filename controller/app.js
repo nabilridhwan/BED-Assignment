@@ -8,6 +8,7 @@ const Users = require('../models/users.js');
 const Category = require("../models/category");
 const Product = require("../models/product");
 const Reviews = require("../models/review");
+const Interest = require("../models/interest");
 
 const ResponseHandler = require("../ErrorHandler");
 
@@ -140,6 +141,21 @@ app.delete("/product/:id", (req, res) => {
     })
 })
 
+// Endpoint 10: POST /product/:id/review/
+app.post("/product/:id/review", (req, res) => {
+    Reviews.insertReview({productid: req.params.id, ...req.body}, (err, data) => {
+        if (err) {
+            console.log(err)
+            h.unknownError(req, res);
+
+        } else {
+            h.response(req, res, 201, {
+                "reviewid": data.insertId
+            });
+        }
+    })
+})
+
 // Endpoint 11: GET /product/:id/reviews
 app.get("/product/:id/reviews", (req, res) => {
     Product.getReviewsForProduct({...req.params}, (err, data) => {
@@ -149,6 +165,19 @@ app.get("/product/:id/reviews", (req, res) => {
 
         } else {
             h.response(req, res, 200, data);
+        }
+    })
+})
+
+// Endpoint 12: POST /interest/:userid
+app.post("/interest/:userid", (req, res) => {
+    Interest.insertInterests({...req.params, ...req.body}, (err, data) => {
+        if (err) {
+            console.log(err)
+            h.unknownError(req, res);
+
+        } else {
+            h.response(req, res, 201, {});
         }
     })
 })
