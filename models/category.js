@@ -1,22 +1,44 @@
 const db = require('../config/db');
 
 const Category = {
-    insertCategory: (category_name, category_description, callback) => {
-        const dbConn = db.getConnection();
+    getAllCategories: (callback) => {
+        var dbConn = db.getConnection();
+        dbConn.connect(function (err) {
+            if (err) {
+                callback(err, null);
+            } else {
+                const sql = "SELECT * FROM category"
+                dbConn.query(sql, [], (err, result) => {
+                    dbConn.end()
+                    
+                    if (err) {
+                        callback(err);
+                    }else{
+                        return callback(err, result)
+                    }
+
+                })
+            }
+        })
+    },
+    
+    insertCategory: ({category_name, category_description}, callback) => {
+        var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 callback(err, null);
             } else {
                 const sql = "INSERT INTO category(category_name, category_description) VALUES(?,?)"
                 dbConn.query(sql, [category_name, category_description], (err, result) => {
+                    dbConn.end()
 
                     
                     if (err) {
                         callback(err);
+                    }else{
+                        return callback(err, result)
                     }
 
-                    dbConn.end()
-                    return callback(err, result)
                 })
             }
         })
