@@ -1,13 +1,14 @@
 const express = require('express');
-let app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
-
+const  app = express();
 const multer = require('multer');
 const path = require('path');
+const Users = require('../models/users.js');
+const Category = require("../models/category");
+const Product = require("../models/product");
+const Reviews = require("../models/review");
+const Interest = require("../models/interest");
+const ResponseHandler = require("../ErrorHandler");
+const h = new ResponseHandler();
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -26,7 +27,6 @@ const upload = multer({
     limits: {
         fileSize: 1000000
     },
-
     fileFilter: function(req, file, cb){
         if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
             cb(null, true);
@@ -36,16 +36,10 @@ const upload = multer({
     }
 }).single('file')
 
-const Users = require('../models/users.js');
-const Category = require("../models/category");
-const Product = require("../models/product");
-const Reviews = require("../models/review");
-const Interest = require("../models/interest");
-
-const ResponseHandler = require("../ErrorHandler");
-const { SSL_OP_TLS_BLOCK_PADDING_BUG } = require('constants');
-
-const h = new ResponseHandler();
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
 
 // Endpoint 1: POST users 
 app.post("/users", (req, res) => {
