@@ -2,7 +2,39 @@ const express = require('express');
 let app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+    extended: true
+}));
+
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../public/uploads/'))
+    },
+
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        let filetype = file.mimetype.split('/')[1];
+        cb(null, file.originalname + '-' + uniqueSuffix + "." + filetype)
+    }
+})
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1000000
+    },
+
+    fileFilter: function(req, file, cb){
+        if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+            cb(null, true);
+        } else {
+            cb(new Error("Not a jpeg or png file"));
+        }
+    }
+}).single('file')
 
 const Users = require('../models/users.js');
 const Category = require("../models/category");
@@ -11,6 +43,7 @@ const Reviews = require("../models/review");
 const Interest = require("../models/interest");
 
 const ResponseHandler = require("../ErrorHandler");
+const { SSL_OP_TLS_BLOCK_PADDING_BUG } = require('constants');
 
 const h = new ResponseHandler();
 
@@ -25,7 +58,7 @@ app.post("/users", (req, res) => {
 
                 h.knownError(req, res, 422, "The new username OR new email provided already exists.")
             } else {
-                h.unknownError(req,res);
+                h.unknownError(req, res);
             }
         } else {
             h.response(req, res, 201, {
@@ -50,7 +83,9 @@ app.get("/users", (req, res) => {
 
 // Endpoint 3: GET /users/:id
 app.get("/users/:id", (req, res) => {
-    Users.getUser({id: req.params.id}, (err, users) => {
+    Users.getUser({
+        id: req.params.id
+    }, (err, users) => {
         if (err) {
             h.unknownError(req, res);
 
@@ -63,7 +98,10 @@ app.get("/users/:id", (req, res) => {
 
 // Endpoint 4: PUT /users/:id
 app.put("/users/:id", (req, res) => {
-    Users.updateUser({id: req.params.id, ...req.body}, (err, data) => {
+    Users.updateUser({
+        id: req.params.id,
+        ...req.body
+    }, (err, data) => {
         if (err) {
             if (err.errno === 1062) {
                 h.knownError(req, res, 422, "The new username OR new email provided already exists.")
@@ -121,21 +159,25 @@ app.post("/product", (req, res) => {
 
 // Endpoint 8: GET /product/:id
 app.get("/product/:id", (req, res) => {
-    Product.getProduct({id: req.params.id}, (err, product) => {
-        if(err){
+    Product.getProduct({
+        id: req.params.id
+    }, (err, product) => {
+        if (err) {
             h.unknownError(req, res);
-        }else{
+        } else {
             h.response(req, res, 200, product);
         }
     })
 })
 // Endpoint 9: DELETE /product/:id
 app.delete("/product/:id", (req, res) => {
-    Product.deleteProduct({id: req.params.id}, (err, product) => {
-        if(err){
+    Product.deleteProduct({
+        id: req.params.id
+    }, (err, product) => {
+        if (err) {
             console.log(err)
             h.unknownError(req, res);
-        }else{
+        } else {
             h.response(req, res, 204, {});
         }
     })
@@ -143,7 +185,10 @@ app.delete("/product/:id", (req, res) => {
 
 // Endpoint 10: POST /product/:id/review/
 app.post("/product/:id/review", (req, res) => {
-    Reviews.insertReview({productid: req.params.id, ...req.body}, (err, data) => {
+    Reviews.insertReview({
+        productid: req.params.id,
+        ...req.body
+    }, (err, data) => {
         if (err) {
             console.log(err)
             h.unknownError(req, res);
@@ -158,7 +203,9 @@ app.post("/product/:id/review", (req, res) => {
 
 // Endpoint 11: GET /product/:id/reviews
 app.get("/product/:id/reviews", (req, res) => {
-    Product.getReviewsForProduct({...req.params}, (err, data) => {
+    Product.getReviewsForProduct({
+        ...req.params
+    }, (err, data) => {
         if (err) {
             console.log(err)
             h.unknownError(req, res);
@@ -171,7 +218,10 @@ app.get("/product/:id/reviews", (req, res) => {
 
 // Endpoint 12: POST /interest/:userid
 app.post("/interest/:userid", (req, res) => {
-    Interest.insertInterests({...req.params, ...req.body}, (err, data) => {
+    Interest.insertInterests({
+        ...req.params,
+        ...req.body
+    }, (err, data) => {
         if (err) {
             console.log(err)
             h.unknownError(req, res);
@@ -182,5 +232,48 @@ app.post("/interest/:userid", (req, res) => {
     })
 })
 
+// Extra endpoints
+app.get("/interest", (req, res) => {
+    Interest.getAllInterests((err, data) => {
+        if (err) {
+            h.unknownError(req, res);
+        } else {
+            h.response(req, res, 200, data);
+        }
+    })
+})
+
+app.get("/interest/:userid", (req, res) => {
+    Interest.getInterestsById({
+        ...req.params
+    }, (err, data) => {
+        if (err) {
+            h.unknownError(req, res);
+        } else {
+            h.response(req, res, 200, data);
+        }
+    })
+})
+
+
+app.get("/product", (req, res) => {
+    Product.getAllProducts((err, data) => {
+        if (err) {
+            h.unknownError(req, res);
+        } else {
+            h.response(req, res, 200, data);
+        }
+    })
+})
+
+app.post("/upload", (req, res) => {
+    upload(req, res, function(err){
+        if(err){
+            res.sendStatus(500);
+        }else{
+            res.sendStatus(201);
+        }
+    })
+})
 
 module.exports = app;

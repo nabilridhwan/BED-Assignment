@@ -29,6 +29,27 @@ const Product = {
         })
     },
 
+    getAllProducts: (callback) => {
+        var dbConn = db.getConnection();
+        dbConn.connect(function (err) {
+            if (err) {
+                callback(err, null);
+            } else {
+                const sql = "SELECT * FROM products"
+                dbConn.query(sql, [], (err, result) => {
+                    dbConn.end()
+
+                    if (err) {
+                        callback(err);
+                    } else {
+                        return callback(err, result)
+                    }
+
+                })
+            }
+        })
+    },
+
     getProduct: ({id}, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
