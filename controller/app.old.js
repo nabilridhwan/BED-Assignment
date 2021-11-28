@@ -1,5 +1,11 @@
+/*
+
+    THIS JS FILE USES RESPONSE HANDLER, THE NEWER ONE DOES NOT!
+
+*/
+
 const express = require('express');
-const  app = express();
+const app = express();
 const multer = require('multer');
 const path = require('path');
 const Users = require('../models/users.js');
@@ -7,7 +13,8 @@ const Category = require("../models/category");
 const Product = require("../models/product");
 const Reviews = require("../models/review");
 const Interest = require("../models/interest");
-const Discount = require("../models/discounts")
+const ResponseHandler = require("../ErrorHandler");
+const h = new ResponseHandler();
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -49,9 +56,9 @@ app.post("/users", (req, res) => {
             const errorNumber = err.errno;
             if (errorNumber === 1062) {
 
-                res.sendStatus(422);
+                h.knownError(req, res, 422, "The new username OR new email provided already exists.")
             } else {
-                res.sendStatus(500);
+                h.unknownError(req, res);
             }
         } else {
             h.response(req, res, 201, {
@@ -65,11 +72,11 @@ app.post("/users", (req, res) => {
 app.get("/users", (req, res) => {
     Users.getAllUsers((err, users) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
 
         } else {
-            res.status(200).json(users);
+            h.response(req, res, 200, users);
         }
     })
 })
@@ -80,10 +87,10 @@ app.get("/users/:id", (req, res) => {
         id: req.params.id
     }, (err, users) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
         } else {
-            res.status(200).json(users);
+            h.response(req, res, 200, users);
         }
     })
 })
@@ -97,12 +104,12 @@ app.put("/users/:id", (req, res) => {
     }, (err, data) => {
         if (err) {
             if (err.errno === 1062) {
-                res.sendStatus(422);
+                h.knownError(req, res, 422, "The new username OR new email provided already exists.")
             } else {
-                res.sendStatus(500);
+                h.unknownError(req, res);
             }
         } else {
-            res.sendStatus(204);
+            h.response(req, res, 204, {});
         }
     })
 })
@@ -114,11 +121,11 @@ app.post("/category", (req, res) => {
             if (err.errno == 1062) {
                 h.knownError(req, res, 422, "The new category name provided already exists")
             } else {
-                res.sendStatus(500);
+                h.unknownError(req, res);
             }
 
         } else {
-            res.sendStatus(204);
+            h.response(req, res, 204, {});
         }
     })
 })
@@ -127,7 +134,7 @@ app.post("/category", (req, res) => {
 app.get("/category", (req, res) => {
     Category.getAllCategories((err, categories) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
             h.response(req, res, 200, categories);
 
@@ -140,7 +147,7 @@ app.post("/product", (req, res) => {
 
     Product.insertProduct(req.body, (err, data) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
         } else {
             h.response(req, res, 201, {
@@ -156,7 +163,7 @@ app.get("/product/:id", (req, res) => {
         id: req.params.id
     }, (err, product) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
             h.response(req, res, 200, product);
         }
@@ -169,9 +176,9 @@ app.delete("/product/:id", (req, res) => {
     }, (err, product) => {
         if (err) {
             console.log(err)
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
-            res.sendStatus(204);
+            h.response(req, res, 204, {});
         }
     })
 })
@@ -184,12 +191,12 @@ app.post("/product/:id/review", (req, res) => {
     }, (err, data) => {
         if (err) {
             console.log(err)
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
         } else {
-            res.status(200).json({
+            h.response(req, res, 201, {
                 "reviewid": data.insertId
-            })
+            });
         }
     })
 })
@@ -201,10 +208,10 @@ app.get("/product/:id/reviews", (req, res) => {
     }, (err, data) => {
         if (err) {
             console.log(err)
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
         } else {
-            res.status(200).json(data);
+            h.response(req, res, 200, data);
         }
     })
 })
@@ -217,10 +224,10 @@ app.post("/interest/:userid", (req, res) => {
     }, (err, data) => {
         if (err) {
             console.log(err)
-            res.sendStatus(500);
+            h.unknownError(req, res);
 
         } else {
-            res.sendStatus(201);
+            h.response(req, res, 201, {});
         }
     })
 })
@@ -229,9 +236,9 @@ app.post("/interest/:userid", (req, res) => {
 app.get("/interest", (req, res) => {
     Interest.getAllInterests((err, data) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
-            res.status(200).json(data);
+            h.response(req, res, 200, data);
         }
     })
 })
@@ -241,66 +248,30 @@ app.get("/interest/:userid", (req, res) => {
         ...req.params
     }, (err, data) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
-            res.status(200).json(data);
+            h.response(req, res, 200, data);
         }
     })
 })
 
-// Get all products
+
 app.get("/product", (req, res) => {
     Product.getAllProducts((err, data) => {
         if (err) {
-            res.sendStatus(500);
+            h.unknownError(req, res);
         } else {
-            res.status(200).json(data);
+            h.response(req, res, 200, data);
         }
     })
 })
 
-// File upload endpoints
 app.post("/upload", (req, res) => {
     upload(req, res, function(err){
         if(err){
             res.sendStatus(500);
         }else{
             res.sendStatus(201);
-        }
-    })
-})
-
-
-// Discount endpoints
-app.get("/discount", (req, res) => {
-    Discount.getAllDiscounts((err, data) => {
-        if(err){
-            res.sendStatus(500);
-        }else{
-            res.status(200);
-            res.json(data);
-        }
-    })
-})
-
-app.post("/discount", (req, res) => {
-    Discount.insertDiscount(req.body, (err, data) => {
-        if(err){
-            console.log(err)
-            res.sendStatus(500);
-        }else{
-            res.sendStatus(201);
-        }
-    })
-})
-
-app.delete("/discount/:discount_id", (req, res) => {
-    Discount.deleteDiscount(req.params, (err, data) => {
-        if(err){
-            console.log(err)
-            res.sendStatus(500);
-        }else{
-            res.sendStatus(204);
         }
     })
 })
