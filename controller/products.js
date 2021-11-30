@@ -4,6 +4,7 @@ const router = express.Router();
 const Product = require("../models/product");
 const Reviews = require("../models/review");
 const Images = require("../models/images");
+const CONFIG = require("../config/host");
 
 const multer = require('multer');
 
@@ -123,9 +124,6 @@ router.post("/:productId/image", (req, res) => {
     // Insert the page
     upload(req, res, function(err){
         const {filename} = req.file;
-
-        console.log(req.file)
-        
         if(err){
             res.status(500).send("Error uploading file");
         }else{
@@ -165,7 +163,7 @@ router.get("/:productId/image", (req, res) => {
 
             Images.getImage({imageId: imageId}, (err, data) => {
 
-                res.status(200).json({...data[0], filelink: `http://localhost:8080/images/${data[0].filename}`});
+                res.status(200).json({...data[0], filelink: `http://${CONFIG.HOST}:${CONFIG.PORT}/images/${data[0].filename}`});
                 
             })
             

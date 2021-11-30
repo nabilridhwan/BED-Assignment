@@ -21,18 +21,4 @@ app.use("/discount", discountsRoute);
 app.use("/interest", interestRoute);
 app.use("/product", productsRoute);
 
-// app.get("/images/:imageId", (req, res) => {
-//     Images.getImage({...req.params}, (err, data) => {
-//         if(err){
-//             res.sendStatus(500);
-//         }else{
-//             if(data.length === 0){
-//                 res.sendStatus(404);
-//             }else{
-//                 res.status(200).json(data);
-//             }
-//         }
-//     })
-// })
-
 module.exports = app;
