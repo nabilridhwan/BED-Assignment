@@ -7,7 +7,7 @@ const Discount = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT * FROM discounts"
+                const sql = "SELECT d.id, da.discount_description, da.discount_amt, da.discount_type, dd.from, dd.to FROM discounts d, discount_dates dd, discount_amount da WHERE d.fk_discount_amount = da.id AND d.fk_discount_date = dd.id;"
                 dbConn.query(sql, [], (err, result) => {
                     dbConn.end()
                     
@@ -22,17 +22,15 @@ const Discount = {
         })
     },
     
-    insertDiscount: ({from_discount, to_discount, discount_value, discount_type, discount_product_id}, callback) => {
+    insertDiscount: ({fk_discount_amount, fk_discount_date}, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "INSERT INTO discounts(from_discount, to_discount, discount_value, discount_type, discount_product_id) VALUES(?,?,?,?,?)"
-                dbConn.query(sql, [from_discount, to_discount, discount_value, discount_type, discount_product_id], (err, result) => {
+                const sql = "INSERT INTO discounts(fk_discount_amount, fk_discount_date) VALUES(?,?)"
+                dbConn.query(sql, [fk_discount_amount, fk_discount_date], (err, result) => {
                     dbConn.end()
-
-                    
                     if (err) {
                         callback(err);
                     }else{

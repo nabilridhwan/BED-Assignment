@@ -56,8 +56,29 @@ const Product = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT p.productid, p.product_name, p.product_description, p.categoryid, c.category_name as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
+                const sql = "SELECT p.productid, p.product_name, p.product_description, p.categoryid, c.category_name as categoryname, p.brand, p.price, p.image_id FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
                 dbConn.query(sql, [id], (err, result) => {
+                    dbConn.end()
+
+                    if (err) {
+                        callback(err);
+                    } else {
+                        return callback(err, result)
+                    }
+
+                })
+            }
+        })
+    },
+
+    updateImage: ({imageId, productId}, callback) => {
+        var dbConn = db.getConnection();
+        dbConn.connect(function (err) {
+            if (err) {
+                callback(err, null);
+            } else {
+                const sql = "UPDATE products SET image_id = ? WHERE productid = ?"
+                dbConn.query(sql, [imageId, productId], (err, result) => {
                     dbConn.end()
 
                     if (err) {
