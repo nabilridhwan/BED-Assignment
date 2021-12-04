@@ -27,51 +27,6 @@ const Images = {
         
     },
 
-    updateImage: ({productId}, callback) => {
-        this.getImageByProductId({...productId}, (err, result) => {
-            if(result){
-                // Delete the product
-                this.deleteImageByProductId({...productId}, (err, result) => {
-                    if(err){
-                        callback(err, null)
-                        
-                    }else{
-                        this.insertImage({...productId, ...filename}, (err, result) => {
-                            if(err){
-                                callback(err, null)
-                            }else{
-                                callback(null, result)
-                            }
-                        })
-                    }
-                })
-            }else{
-                callback(err, null)
-            }
-        })
-    },
-
-    deleteImageByProductId: ({productId}, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "DELETE FROM images WHERE images.product_id = ?"
-                dbConn.query(sql, [productId], (err, result) => {
-                    dbConn.end()
-
-                    if (err) {
-                        callback(err);
-                    }else{
-                        return callback(err, result)
-                    }
-
-                })
-            }
-        })
-    },
-    
     insertImage: ({productId, filename}, callback) => {
         var dbConn = db.getConnection();
 
