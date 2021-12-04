@@ -16,9 +16,7 @@ router.post("/users", (req, res) => {
                 res.sendStatus(500);
             }
         } else {
-            h.response(req, res, 201, {
-                userid: data.insertId
-            });
+            res.status(201).json({userid: data.insertId});
         }
     })
 })
@@ -28,8 +26,6 @@ router.get("/users", (req, res) => {
     Users.getAllUsers((err, users) => {
         if (err) {
             res.sendStatus(500);
-
-
         } else {
             res.status(200).json(users);
         }

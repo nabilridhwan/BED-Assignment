@@ -5,12 +5,13 @@ const Product = require("../models/product");
 const Reviews = require("../models/review");
 const Images = require("../models/images");
 const CONFIG = require("../config/host");
+const path = require("path");
 
 const multer = require('multer');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../public/images'))
+        cb(null, path.join(__dirname, "../public/images"));
     },
 
     filename: function (req, file, cb) {
@@ -25,8 +26,8 @@ const upload = multer({
     limits: {
         fileSize: 1000000
     },
-    fileFilter: function(req, file, cb){
-        if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, true);
         } else {
             cb(new Error("Not a jpeg or png file"));
@@ -53,9 +54,9 @@ router.post("/", (req, res) => {
             res.sendStatus(500);
 
         } else {
-            h.response(req, res, 201, {
+            res.status(201).json({
                 "productid": data.insertId
-            });
+            })
         }
     })
 })
@@ -122,29 +123,22 @@ router.get("/:id/reviews", (req, res) => {
 // Upload an image for a specific product
 router.post("/:productId/image", (req, res) => {
     // Insert the page
-    upload(req, res, function(err){
-        const {filename} = req.file;
-        if(err){
+    upload(req, res, function (err) {
+        const {
+            filename
+        } = req.file;
+        if (err) {
             res.status(500).send("Error uploading file");
-        }else{
-
-            Images.insertImage({filename: filename}, (err, data) => {
-                if(err){
+        } else {
+            Images.insertImage({
+                ...req.params,
+                filename: filename
+            }, (err, data) => {
+                if (err) {
                     console.log(err);
                     res.sendStatus(500);
-                }else{
-                    const imageId = data.insertId;
-                    // res.status(201).json({imageId: imageId});
-
-                    // TODO: Make request to the endpoint below
-                    Product.updateImage({...req.params, imageId: imageId}, (err, data) => {
-                        if(err){
-                            console.log(err);
-                            res.sendStatus(500);
-                        }else{
-                            res.sendStatus(204);
-                        }
-                    })
+                } else {
+                    res.sendStatus(204);
                 }
             })
         }
@@ -152,32 +146,20 @@ router.post("/:productId/image", (req, res) => {
 })
 
 router.get("/:productId/image", (req, res) => {
-    Product.getProduct({id: req.params.productId}, (err,data) => {
-        if(err){
-            res.sendStatus(500);
-        }else{
+    Images.getImageByProductId({
+        ...req.params
+    }, (err, data) => {
+        if (err) {
+            res.status(500);
+        } else {
 
+            if (data.length > 0) {
+                res.status(200);
+                res.json(data)
+            } else {
+                res.sendStatus(404);
+            }
 
-            // Get the image id
-            const imageId = data[0].image_id;
-
-            Images.getImage({imageId: imageId}, (err, data) => {
-
-                res.status(200).json({...data[0], filelink: `http://${CONFIG.HOST}:${CONFIG.PORT}/images/${data[0].filename}`});
-                
-            })
-            
-        }
-    })
-})
-
-router.put("/:productId/image", (req, res) => {
-    Product.updateImage({...req.params, imageId: req.body.imageId}, (err, data) => {
-        if(err){
-            console.log(err);
-            res.sendStatus(500);
-        }else{
-            res.sendStatus(204);
         }
     })
 })

@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const cors = require('cors')
 
 const usersRoute = require('./users.js');
 const categoriesRoute = require('./categories.js');
@@ -14,6 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({
     extended: true
 }));
+
+app.use(cors())
 
 app.use("/", usersRoute);
 app.use("/category", categoriesRoute);

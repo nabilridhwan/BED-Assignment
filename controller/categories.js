@@ -8,7 +8,7 @@ router.post("/", (req, res) => {
     Category.insertCategory(req.body, (err, data) => {
         if (err) {
             if (err.errno == 1062) {
-                h.knownError(req, res, 422, "The new category name provided already exists")
+                res.status(422).send("The new category name provided already exists")
             } else {
                 res.sendStatus(500);
             }
