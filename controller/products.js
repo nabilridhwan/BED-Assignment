@@ -4,7 +4,6 @@ const router = express.Router();
 const Product = require("../models/product");
 const Reviews = require("../models/review");
 const Images = require("../models/images");
-const CONFIG = require("../config/host");
 const path = require("path");
 
 const multer = require('multer');
@@ -113,9 +112,12 @@ router.get("/:id/reviews", (req, res) => {
         if (err) {
             console.log(err)
             res.sendStatus(500);
-
         } else {
-            res.status(200).json(data);
+            if(data.length > 0){
+                res.status(200).json(data);
+            }else{
+                res.sendStatus(404);
+            }
         }
     })
 })
