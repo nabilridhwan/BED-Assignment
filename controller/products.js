@@ -29,7 +29,7 @@ const upload = multer({
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, true);
         } else {
-            cb(new Error("Not a jpeg or png file"));
+            cb(new Error("The file is not a jpeg, jpg or png file"));
         }
     }
 }).single('file')
@@ -126,12 +126,17 @@ router.get("/:id/reviews", (req, res) => {
 router.post("/:productId/image", (req, res) => {
     // Insert the page
     upload(req, res, function (err) {
-        const {
-            filename
-        } = req.file;
+
+        // Error handling for 
         if (err) {
-            res.status(500).send("Error uploading file");
+            if(err.message == "File too large") err.message += ". The limit is 1MB";
+            res.status(500).send(err.message);
         } else {
+
+            const {
+                filename
+            } = req.file;
+
             Images.insertImage({
                 ...req.params,
                 filename: filename
