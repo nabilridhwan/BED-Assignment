@@ -10,7 +10,7 @@ const Images = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT i.filename FROM products p, images i WHERE p.image_id = i.imageid AND p.productid = ?;"
+                const sql = "SELECT i.filename FROM products p, product_images i WHERE p.productid = i.productid AND p.productid = ?;"
                 dbConn.query(sql, [productId], (err, result) => {
                     dbConn.end()
 
@@ -27,39 +27,36 @@ const Images = {
         
     },
 
-    insertProductImage: ({productId, filename}, callback) => {
+    insertProductImages: ({productId, fileObject}, callback) => {
         var dbConn = db.getConnection();
 
-        filename = filename || null;
+        
 
         // Insert into the image table first
         dbConn.connect(function (err) {
             if (err) {
                 return callback(err, null);
             } else {
-                const sql = "INSERT INTO images(filename) VALUES(?)"
-                dbConn.query(sql, [filename], (err, result) => {
+                const sql = "INSERT INTO product_images(productid, filename) VALUES(?, ?)"
 
-                    const {insertId} = result;
-                    const secondSql = "UPDATE products SET image_id = ? WHERE productid = ?"
-
-                    // Update the table id;
-                    dbConn.query(secondSql, [insertId, productId], (err, result) => {
-                        dbConn.end()
-                        if (err) {
+                for(let i = 0; i < fileObject.length; i++){
+                    const filename = fileObject[i].filename;
+                    dbConn.query(sql, [productId, filename], (err, result) => {
+                        if(err){
                             return callback(err, null);
-                        }else{
-                            return callback(null, result)
                         }
+
                     })
+                }
+                dbConn.end()
+                return callback(null, 'success')
 
 
-                })
             }
         })
     },
 
-    insertProfilePicure: ({userid, filename}, callback) => {
+    insertProfilePicture: ({userid, filename}, callback) => {
         var dbConn = db.getConnection();
 
         userid = userid || null;
@@ -71,8 +68,14 @@ const Images = {
             if (err) {
                 return callback(err, null);
             } else {
-                const sql = "INSERT INTO images(filename) VALUES(?)"
-                dbConn.query(sql, [filename], (err, result) => {
+
+                // TODO: Update with new table for profile pictures!
+                const sql = "INSERT INTO profile_picture_images(userid, filename) VALUES(?, ?)"
+                dbConn.query(sql, [userid, filename], (err, result) => {
+
+                    if(err){
+                        return callback(err, null);
+                    }
 
                     // const {insertId} = result;
                     const secondSql = "UPDATE users SET profile_pic_url = ? WHERE userid = ?"

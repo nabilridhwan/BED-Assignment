@@ -32,7 +32,7 @@ const upload = multer({
             cb(new Error("The file is not a jpeg, jpg or png file"));
         }
     }
-}).single('file')
+}).array('product_images', 5)
 
 // Get all products
 router.get("/", (req, res) => {
@@ -130,22 +130,21 @@ router.post("/:productId/image", (req, res) => {
         // Error handling for 
         if (err) {
             if(err.message == "File too large") err.message += ". The limit is 1MB";
-            res.status(500).send(err.message);
+            if(err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
+            return res.status(500).send(err.message);
         } else {
 
-            const {
-                filename
-            } = req.file;
+            const files = req.files;
 
-            Images.insertProductImage({
+            Images.insertProductImages({
                 ...req.params,
-                filename: filename
+                fileObject: files
             }, (err, data) => {
                 if (err) {
                     console.log(err);
-                    res.sendStatus(500);
+                    return res.sendStatus(500);
                 } else {
-                    res.sendStatus(204);
+                    return res.sendStatus(204);
                 }
             })
         }
@@ -161,8 +160,8 @@ router.get("/:productId/image", (req, res) => {
         } else {
 
             if (data.length > 0) {
-                res.status(200);
-                res.json(data)
+                res.status(200)
+                res.json(data.map(data => data.filename))
             } else {
                 res.sendStatus(404);
             }

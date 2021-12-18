@@ -110,7 +110,7 @@ router.post("/users/:userid/image", (req, res) => {
                 filename
             } = req.file;
 
-            Images.insertProfilePicure({
+            Images.insertProfilePicture({
                 ...req.params,
                 filename: filename
             }, (err, data) => {
