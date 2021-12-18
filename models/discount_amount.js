@@ -23,6 +23,11 @@ const DiscountAmount = {
     },
 
     insertDiscountAmount: ({discount_description, discount_amt, discount_type},callback) => {
+
+        discount_description = discount_description || null;
+discount_amt = discount_amt || null;
+discount_type = discount_type || null;
+
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {

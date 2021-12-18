@@ -9,6 +9,13 @@ const Product = {
         brand,
         price
     }, callback) => {
+
+        product_name = product_name || null;
+        product_description = product_description || null;
+        categoryid = categoryid || null;
+        brand = brand || null;
+        price = price || null;
+        
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -50,7 +57,9 @@ const Product = {
         })
     },
 
-    getProduct: ({id}, callback) => {
+    getProduct: ({
+        id
+    }, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -71,7 +80,10 @@ const Product = {
         })
     },
 
-    updateImage: ({imageId, productId}, callback) => {
+    updateImage: ({
+        imageId,
+        productId
+    }, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -92,7 +104,9 @@ const Product = {
         })
     },
 
-    deleteProduct: ({id}, callback) => {
+    deleteProduct: ({
+        id
+    }, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -113,7 +127,9 @@ const Product = {
         })
     },
 
-    getReviewsForProduct: ({id}, callback) => {
+    getReviewsForProduct: ({
+        id
+    }, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {

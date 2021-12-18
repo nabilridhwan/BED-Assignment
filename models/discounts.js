@@ -23,6 +23,9 @@ const Discount = {
     },
     
     insertDiscount: ({fk_discount_amount, fk_discount_date}, callback) => {
+
+        fk_discount_amount = fk_discount_amount || null;
+fk_discount_date = fk_discount_date || null;
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {

@@ -22,7 +22,9 @@ const userDB = {
         })
     },
 
-    getUser: ({id}, callback) => {
+    getUser: ({
+        id
+    }, callback) => {
         const dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -44,7 +46,20 @@ const userDB = {
     },
 
 
-    insertUser: function ({email, contact, type, profile_pic_url, username}, callback) {
+    insertUser: function ({
+        email,
+        contact,
+        type,
+        profile_pic_url,
+        username
+    }, callback) {
+
+        email = email || null;
+        contact = contact || null;
+        type = type || null;
+        profile_pic_url = profile_pic_url || null;
+        username = username || null;
+
         const dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -65,7 +80,22 @@ const userDB = {
         })
     },
 
-    updateUser: function ({id, email, contact, type, profile_pic_url, username}, callback) {
+    updateUser: function ({
+        id,
+        email,
+        contact,
+        type,
+        profile_pic_url,
+        username
+    }, callback) {
+
+        email = email || null;
+        contact = contact || null;
+        type = type || null;
+        profile_pic_url = profile_pic_url || null;
+        username = username || null;
+        id = id || null;
+
         const dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {

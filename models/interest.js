@@ -48,6 +48,8 @@ const Interest = {
         userid,
         categoryids
     }, callback) => {
+        userid = userid || null;
+        categoryId = categoryId || null;
         const categories = categoryids.replace(/\s/g, '').split(',');
 
         var dbConn = db.getConnection();

@@ -26,6 +26,9 @@ const DiscountDates = {
         from_date,
         to_date
     }, callback) => {
+
+        from_date = from_date || null;
+        to_date = to_date || null;
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {

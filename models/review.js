@@ -8,6 +8,12 @@ const Reviews = {
         rating,
         review,
     }, callback) => {
+
+        productid = productid || null;
+        userid = userid || null;
+        rating = rating || null;
+        review = review || null;
+
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
