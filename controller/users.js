@@ -2,6 +2,36 @@ const express = require('express');
 const router = express.Router();
 const Users = require('../models/users.js');
 
+const multer = require("multer")
+const Images = require("../models/Images")
+const path = require("path")
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, "../public/images"));
+    },
+
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        let filetype = file.mimetype.split('/')[1];
+        cb(null, uniqueSuffix + "." + filetype)
+    }
+})
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, true);
+        } else {
+            cb(new Error("The file is not a jpeg, jpg or png file"));
+        }
+    }
+}).single('profile_picture')
+
 // Endpoint 1: POST users 
 router.post("/users", (req, res) => {
     Users.insertUser(req.body, (err, data) => {
@@ -10,7 +40,6 @@ router.post("/users", (req, res) => {
             console.log(err)
             const errorNumber = err.errno;
             if (errorNumber === 1062) {
-
                 res.sendStatus(422);
             } else {
                 res.sendStatus(500);
@@ -61,6 +90,37 @@ router.put("/users/:id", (req, res) => {
             }
         } else {
             res.sendStatus(204);
+        }
+    })
+})
+
+// User profile image url
+router.post("/users/:userid/image", (req, res) => {
+    // Upload an image for a specific product
+    // Insert the page
+    upload(req, res, function (err) {
+
+        // Error handling for 
+        if (err) {
+            if(err.message == "File too large") err.message += ". The limit is 1MB";
+            res.status(500).send(err.message);
+        } else {
+
+            const {
+                filename
+            } = req.file;
+
+            Images.insertProfilePicure({
+                ...req.params,
+                filename: filename
+            }, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    res.sendStatus(500);
+                } else {
+                    res.sendStatus(204);
+                }
+            })
         }
     })
 })

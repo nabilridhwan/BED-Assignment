@@ -137,7 +137,7 @@ router.post("/:productId/image", (req, res) => {
                 filename
             } = req.file;
 
-            Images.insertImage({
+            Images.insertProductImage({
                 ...req.params,
                 filename: filename
             }, (err, data) => {
