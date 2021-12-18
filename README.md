@@ -1,6 +1,7 @@
 <h1>BED Assignment</h1>
-<p>Nabil Ridhwanshah DIT/FT/1A/05</p>
+<p>Nabil Ridhwanshah - DIT/FT/1A/05</p>
 
-<h2>Database Structure</h2>
-<p>This is the database structure for the BED assignment</p>
-<img src="./dbstructure.png"/>
+## Advanced Features
+- Endpoint for inserting images to a product
+- Endpoint for changing a user's profile picture
+- Rate limiting per IP (100 requests/15 mins)
