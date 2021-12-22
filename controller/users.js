@@ -3,8 +3,8 @@ const router = express.Router();
 const Users = require('../models/users.js');
 
 const multer = require("multer")
-const Images = require("../models/Images")
-const path = require("path")
+const path = require("path");
+const ProfilePictureImages = require('../models/ProfilePictureImages.js');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,12 +40,14 @@ router.post("/users", (req, res) => {
             console.log(err)
             const errorNumber = err.errno;
             if (errorNumber === 1062) {
-                res.sendStatus(422);
+                res.status(422).send("The email or username provided already exists");
             } else {
                 res.sendStatus(500);
             }
         } else {
-            res.status(201).json({userid: data.insertId});
+            res.status(201).json({
+                userid: data.insertId
+            });
         }
     })
 })
@@ -63,65 +65,99 @@ router.get("/users", (req, res) => {
 
 // Endpoint 3: GET /users/:id
 router.get("/users/:id", (req, res) => {
-    Users.getUser({
-        id: req.params.id
-    }, (err, users) => {
-        if (err) {
-            res.sendStatus(500);
+    const {
+        id
+    } = req.params;
 
-        } else {
-            res.status(200).json(users);
-        }
-    })
+    if (isNaN(id)) {
+        res.status(400).send("The User ID provided must be a number")
+    } else {
+        Users.getUser({
+            id
+        }, (err, users) => {
+            if (err) {
+                res.sendStatus(500);
+
+            } else {
+                if (users.length == 0) {
+                    res.sendStatus(404);
+                } else {
+                    res.status(200).json(users);
+                }
+            }
+        })
+    }
+
 })
 
 
 // Endpoint 4: PUT /users/:id
 router.put("/users/:id", (req, res) => {
-    Users.updateUser({
-        id: req.params.id,
-        ...req.body
-    }, (err, data) => {
-        if (err) {
-            if (err.errno === 1062) {
-                res.sendStatus(422);
+    const {
+        id
+    } = req.params;
+
+    if(isNaN(id)){
+        res.status(400).send("The User ID provided must be a number")
+    }else{
+        Users.updateUser({
+            id,
+            ...req.body
+        }, (err, data) => {
+            if (err) {
+                console.log(err)
+                if (err.errno === 1062) {
+                    res.status(422).send("The new username OR new email provided already exists.")
+                }else if(err.errno === -1){
+                    res.sendStatus(404);
+                }else {
+                    res.sendStatus(500);
+                }
             } else {
-                res.sendStatus(500);
+                res.sendStatus(204);
             }
-        } else {
-            res.sendStatus(204);
-        }
-    })
+        })
+    }
 })
 
 // User profile image url
+
 router.post("/users/:userid/image", (req, res) => {
     // Upload an image for a specific product
     // Insert the page
+
     upload(req, res, function (err) {
 
-        // Error handling for 
-        if (err) {
-            if(err.message == "File too large") err.message += ". The limit is 1MB";
-            res.status(500).send(err.message);
+        if (!req.file) {
+            res.status(400).send("There is no picture provided")
+
         } else {
+            // Error handling for 
+            if (err) {
+                if (err.message == "File too large") err.message += ". The limit is 1MB";
+                res.status(500).send(err.message);
+            } else {
 
-            const {
-                filename
-            } = req.file;
+                const {
+                    filename
+                } = req.file;
 
-            Images.insertProfilePicture({
-                ...req.params,
-                filename: filename
-            }, (err, data) => {
-                if (err) {
-                    console.log(err);
-                    res.sendStatus(500);
-                } else {
-                    res.sendStatus(204);
-                }
-            })
+                
+                ProfilePictureImages.insertProfilePicture({
+                    ...req.params,
+                    filename: filename
+                }, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        res.sendStatus(500);
+                    } else {
+                        res.sendStatus(204);
+                    }
+                })
+            }
         }
+
+
     })
 })
 

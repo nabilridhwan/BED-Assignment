@@ -29,7 +29,7 @@ router.get("/", (req, res) => {
     })
 })
 
-router.get("/interest/:userid", (req, res) => {
+router.get("/:userid", (req, res) => {
     Interest.getInterestsById({
         ...req.params
     }, (err, data) => {

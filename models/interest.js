@@ -9,7 +9,7 @@ const Interest = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category_name from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid"
+                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid"
                 dbConn.query(sql, [], (err, result) => {
                     dbConn.end();
                     if (err) {
@@ -30,7 +30,7 @@ const Interest = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category_name from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
+                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
                 dbConn.query(sql, [userid], (err, result) => {
 
                     dbConn.end();
@@ -49,24 +49,41 @@ const Interest = {
         categoryids
     }, callback) => {
         userid = userid || null;
-        categoryId = categoryId || null;
-        const categories = categoryids.replace(/\s/g, '').split(',');
+        categoryids = categoryids ? categoryids.replace(/\s/g, '').split(',') : null;
+
+        console.log(categoryids)
 
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 callback(err, null);
             } else {
+                let sqlQueryError = false;
                 const sql = "INSERT INTO interest(userid, categoryid) VALUES(?,?)"
-                categories.forEach(categoryId => {
-                    dbConn.query(sql, [userid, categoryId], (err, result) => {
-                        if (err) {
-                            return callback(err);
-                        }
+                if(categoryids != null){
+                    categoryids.forEach((categoryId, index) => {
+                        dbConn.query(sql, [userid, categoryId], (err, result) => {
+                            if (err) {
+                                sqlQueryError = true;
+                            }
+    
+                            // Check if the loop is done
+                            if (index == categoryids.length - 1) {
+    
+                                // Checks for the error, if error, returns callback error or else success
+                                if (sqlQueryError) {
+                                    callback(err, null);
+                                } else {
+                                    return callback(null, 'success')
+    
+                                }
+                            }
+                        })
                     })
-                })
+                }else{
+                    callback(true, null);
+                }
                 dbConn.end()
-                return callback(null, 'success');
             }
         })
     },

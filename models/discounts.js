@@ -51,7 +51,7 @@ fk_discount_date = fk_discount_date || null;
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "DELETE FROM discounts WHERE discountid = ?"
+                const sql = "DELETE FROM discounts WHERE id = ?"
                 dbConn.query(sql, [discount_id], (err, result) => {
                     dbConn.end()
 

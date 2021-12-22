@@ -3,10 +3,10 @@ const router = express.Router();
 
 const Product = require("../models/product");
 const Reviews = require("../models/review");
-const Images = require("../models/images");
 const path = require("path");
 
 const multer = require('multer');
+const ProductImages = require('../models/ProductImages');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -66,6 +66,7 @@ router.get("/:id", (req, res) => {
         id: req.params.id
     }, (err, product) => {
         if (err) {
+            console.log(err)
             res.sendStatus(500);
         } else {
             res.status(200).json(product);
@@ -78,8 +79,11 @@ router.delete("/:id", (req, res) => {
         id: req.params.id
     }, (err, product) => {
         if (err) {
-            console.log(err)
+            if(err.errno == -1){
+                res.sendStatus(404);
+            }else{
             res.sendStatus(500);
+            }
         } else {
             res.sendStatus(204);
         }
@@ -94,8 +98,11 @@ router.post("/:id/review", (req, res) => {
     }, (err, data) => {
         if (err) {
             console.log(err)
-            res.sendStatus(500);
-
+            if(err.errno == 1452){
+                res.sendStatus(404);
+            }else{
+                res.sendStatus(500);
+            }
         } else {
             res.status(200).json({
                 "reviewid": data.insertId
@@ -113,9 +120,9 @@ router.get("/:id/reviews", (req, res) => {
             console.log(err)
             res.sendStatus(500);
         } else {
-            if(data.length > 0){
+            if (data.length > 0) {
                 res.status(200).json(data);
-            }else{
+            } else {
                 res.sendStatus(404);
             }
         }
@@ -127,32 +134,36 @@ router.post("/:productId/image", (req, res) => {
     // Insert the page
     upload(req, res, function (err) {
 
-        // Error handling for 
-        if (err) {
-            if(err.message == "File too large") err.message += ". The limit is 1MB";
-            if(err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
-            return res.status(500).send(err.message);
+        if (!req.files) {
+            return res.status(400).send("There is/are no image(s) provided.")
         } else {
+            // Error handling for 
+            if (err) {
+                if (err.message == "File too large") err.message += ". The limit is 1MB";
+                if (err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
+                return res.status(500).send(err.message);
+            } else {
 
-            const files = req.files;
-
-            Images.insertProductImages({
-                ...req.params,
-                fileObject: files
-            }, (err, data) => {
-                if (err) {
-                    console.log(err);
-                    return res.sendStatus(500);
-                } else {
-                    return res.sendStatus(204);
-                }
-            })
+                const files = req.files;
+                
+                ProductImages.insertProductImages({
+                    ...req.params,
+                    fileObject: files
+                }, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        return res.sendStatus(500);
+                    } else {
+                        return res.sendStatus(204);
+                    }
+                })
+            }
         }
     })
 })
 
 router.get("/:productId/image", (req, res) => {
-    Images.getImageByProductId({
+    ProductImages.getImageByProductId({
         ...req.params
     }, (err, data) => {
         if (err) {

@@ -3,15 +3,15 @@ const db = require('../config/db');
 const Product = {
 
     insertProduct: ({
-        product_name,
-        product_description,
+        name,
+        description,
         categoryid,
         brand,
         price
     }, callback) => {
 
-        product_name = product_name || null;
-        product_description = product_description || null;
+        name = name || null;
+        description = description || null;
         categoryid = categoryid || null;
         brand = brand || null;
         price = price || null;
@@ -21,8 +21,8 @@ const Product = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "INSERT INTO products(product_name, product_description, categoryid, brand, price) VALUES(?, ?, ?, ?, ?)"
-                dbConn.query(sql, [product_name, product_description, categoryid, brand, price], (err, result) => {
+                const sql = "INSERT INTO products(name, description, categoryid, brand, price) VALUES(?, ?, ?, ?, ?)"
+                dbConn.query(sql, [name, description, categoryid, brand, price], (err, result) => {
                     dbConn.end()
 
                     if (err) {
@@ -65,32 +65,8 @@ const Product = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT p.productid, p.product_name, p.product_description, p.categoryid, c.category_name as categoryname, p.brand, p.price, p.image_id FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
+                const sql = "SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
                 dbConn.query(sql, [id], (err, result) => {
-                    dbConn.end()
-
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-
-                })
-            }
-        })
-    },
-
-    updateImage: ({
-        imageId,
-        productId
-    }, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "UPDATE products SET image_id = ? WHERE productid = ?"
-                dbConn.query(sql, [imageId, productId], (err, result) => {
                     dbConn.end()
 
                     if (err) {
@@ -117,9 +93,13 @@ const Product = {
                     dbConn.end()
 
                     if (err) {
-                        callback(err);
+                        callback(err, null);
                     } else {
-                        return callback(err, result)
+                        if(result.affectedRows == 0){
+                            return callback({errno: -1}, null)
+                        }else{
+                            return callback(err, result)
+                        }
                     }
 
                 })

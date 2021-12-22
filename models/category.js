@@ -22,14 +22,14 @@ const Category = {
         })
     },
     
-    insertCategory: ({category_name, category_description}, callback) => {
+    insertCategory: ({category, description}, callback) => {
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "INSERT INTO category(category_name, category_description) VALUES(?,?)"
-                dbConn.query(sql, [category_name, category_description], (err, result) => {
+                const sql = "INSERT INTO category(category, description) VALUES(?,?)"
+                dbConn.query(sql, [category, description], (err, result) => {
                     dbConn.end()
 
                     

@@ -6,7 +6,8 @@ const dbconnect = {
             host: 'localhost',
             user: 'root',
             password: 'root',
-            database: 'sp_it'
+            database: 'sp_it',
+            dateStrings: true
         });
         return conn;
     }
