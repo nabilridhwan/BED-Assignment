@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
         let filetype = file.mimetype.split('/')[1];
-        cb(null, uniqueSuffix + "." + filetype)
+        cb(null, `p_${uniqueSuffix}.${filetype}`)
     }
 })
 
@@ -79,10 +79,10 @@ router.delete("/:id", (req, res) => {
         id: req.params.id
     }, (err, product) => {
         if (err) {
-            if(err.errno == -1){
+            if (err.errno == -1) {
                 res.sendStatus(404);
-            }else{
-            res.sendStatus(500);
+            } else {
+                res.sendStatus(500);
             }
         } else {
             res.sendStatus(204);
@@ -98,9 +98,9 @@ router.post("/:id/review", (req, res) => {
     }, (err, data) => {
         if (err) {
             console.log(err)
-            if(err.errno == 1452){
+            if (err.errno == 1452) {
                 res.sendStatus(404);
-            }else{
+            } else {
                 res.sendStatus(500);
             }
         } else {
@@ -134,30 +134,30 @@ router.post("/:productId/image", (req, res) => {
     // Insert the page
     upload(req, res, function (err) {
 
-        if (!req.files) {
-            return res.status(400).send("There is/are no image(s) provided.")
-        } else {
-            // Error handling for 
-            if (err) {
-                if (err.message == "File too large") err.message += ". The limit is 1MB";
-                if (err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
-                return res.status(500).send(err.message);
-            } else {
 
-                const files = req.files;
-                
-                ProductImages.insertProductImages({
-                    ...req.params,
-                    fileObject: files
-                }, (err, data) => {
-                    if (err) {
-                        console.log(err);
-                        return res.sendStatus(500);
-                    } else {
-                        return res.sendStatus(204);
-                    }
-                })
+        // Error handling for 
+        if (err) {
+            if (err.message == "File too large") err.message += ". The limit is 1MB";
+            if (err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
+            return res.status(500).send(err.message);
+        } else {
+
+            const files = req.files;
+            if (!files) {
+                return res.status(400).send("There is/are no image(s) provided.")
             }
+
+            ProductImages.insertProductImages({
+                ...req.params,
+                fileObject: files
+            }, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(500);
+                } else {
+                    return res.sendStatus(204);
+                }
+            })
         }
     })
 })

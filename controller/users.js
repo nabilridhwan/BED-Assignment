@@ -5,6 +5,7 @@ const Users = require('../models/users.js');
 const multer = require("multer")
 const path = require("path");
 const ProfilePictureImages = require('../models/ProfilePictureImages.js');
+const { CLIENT_IGNORE_SIGPIPE } = require('mysql/lib/protocol/constants/client');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -14,7 +15,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
         let filetype = file.mimetype.split('/')[1];
-        cb(null, uniqueSuffix + "." + filetype)
+        cb(null, `pfp_${uniqueSuffix}.${filetype}`)
     }
 })
 
@@ -97,9 +98,9 @@ router.put("/users/:id", (req, res) => {
         id
     } = req.params;
 
-    if(isNaN(id)){
+    if (isNaN(id)) {
         res.status(400).send("The User ID provided must be a number")
-    }else{
+    } else {
         Users.updateUser({
             id,
             ...req.body
@@ -108,9 +109,9 @@ router.put("/users/:id", (req, res) => {
                 console.log(err)
                 if (err.errno === 1062) {
                     res.status(422).send("The new username OR new email provided already exists.")
-                }else if(err.errno === -1){
+                } else if (err.errno === -1) {
                     res.sendStatus(404);
-                }else {
+                } else {
                     res.sendStatus(500);
                 }
             } else {
@@ -128,33 +129,33 @@ router.post("/users/:userid/image", (req, res) => {
 
     upload(req, res, function (err) {
 
-        if (!req.file) {
-            res.status(400).send("There is no picture provided")
-
+        // Error handling for if there is one, however, send a status code of 500
+        if (err) {
+            if (err.message == "File too large") err.message += ". The limit is 1MB";
+            res.status(500).send(err.message);
         } else {
-            // Error handling for 
-            if (err) {
-                if (err.message == "File too large") err.message += ". The limit is 1MB";
-                res.status(500).send(err.message);
-            } else {
-
-                const {
-                    filename
-                } = req.file;
-
-                
-                ProfilePictureImages.insertProfilePicture({
-                    ...req.params,
-                    filename: filename
-                }, (err, data) => {
-                    if (err) {
-                        console.log(err);
-                        res.sendStatus(500);
-                    } else {
-                        res.sendStatus(204);
-                    }
-                })
+            
+            // If there is no file, return with a status code of 400 indicating a bad request
+            if(!req.file){
+                return res.status(400).send("There is no image provided");
             }
+
+            const {
+                filename
+            } = req.file;
+
+
+            ProfilePictureImages.insertProfilePicture({
+                ...req.params,
+                filename: filename
+            }, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    res.sendStatus(500);
+                } else {
+                    res.sendStatus(204);
+                }
+            })
         }
 
 
