@@ -167,7 +167,7 @@ router.post("/:productId/image", (req, res) => {
                         return res.status(500).send(err);
                     }
 
-                    files.forEach(async file => {
+                    files.forEach(async (file, index) => {
                         // Try to upload file
                         try {
                             let data = await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
@@ -188,9 +188,11 @@ router.post("/:productId/image", (req, res) => {
                         } catch (err) {
                             return res.status(500).send(err)
                         }
-                    })
 
-                    res.sendStatus(204);
+                        if(index == files.length - 1){
+                            return res.sendStatus(204);
+                        }
+                    })
                 })
             })
         }
