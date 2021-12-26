@@ -18,8 +18,6 @@ const limiter = rateLimit({
   message: "Too much request from this IP, please try again later"
 });
 
-// Static files (Images) found at /images link
-app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true
