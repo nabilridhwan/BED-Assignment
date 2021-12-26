@@ -1,15 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const Users = require('../models/users.js');
+const os = require('os');
 
 const multer = require("multer")
 const path = require("path");
 const ProfilePictureImages = require('../models/ProfilePictureImages.js');
-const { CLIENT_IGNORE_SIGPIPE } = require('mysql/lib/protocol/constants/client');
+const {
+    CLIENT_IGNORE_SIGPIPE
+} = require('mysql/lib/protocol/constants/client');
+const uploadStreamToCloudinary = require('../utils/cloudinary.js');
+const uploadFileToCloudinary = require('../utils/cloudinary.js');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, "../public/images"));
+        const dirOfFile = path.join(__dirname, "../tmp")
+
+        if (!fs.existsSync(dirOfFile)) {
+            fs.mkdirSync(dirOfFile);
+        }
+        cb(null, dirOfFile);
     },
 
     filename: function (req, file, cb) {
@@ -123,20 +134,24 @@ router.put("/users/:id", (req, res) => {
 
 // User profile image url
 
-router.post("/users/:userid/image", (req, res) => {
+router.post("/users/:userid/image", upload, (req, res) => {
+
+    console.log()
     // Upload an image for a specific product
     // Insert the page
 
     upload(req, res, function (err) {
+
+        // Holds the directory of file
 
         // Error handling for if there is one, however, send a status code of 500
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
             res.status(500).send(err.message);
         } else {
-            
+
             // If there is no file, return with a status code of 400 indicating a bad request
-            if(!req.file){
+            if (!req.file) {
                 return res.status(400).send("There is no image provided");
             }
 
@@ -144,18 +159,39 @@ router.post("/users/:userid/image", (req, res) => {
                 filename
             } = req.file;
 
+            const dirOfFile = path.join(__dirname, "../tmp", filename)
 
-            ProfilePictureImages.insertProfilePicture({
-                ...req.params,
-                filename: filename
-            }, (err, data) => {
-                if (err) {
-                    console.log(err);
-                    res.sendStatus(500);
-                } else {
-                    res.sendStatus(204);
-                }
-            })
+            uploadFileToCloudinary(dirOfFile, "profile_pictures")
+                .then(data => {
+                    const {
+                        secure_url
+                    } = data;
+
+                    // Delete the file from the directory
+                    fs.unlink(dirOfFile, (err) => {
+                        if (err) {
+                            console.log(err)
+                        }
+                    })
+
+                    // Insert into database
+                    ProfilePictureImages.insertProfilePicture({
+                        ...req.params,
+                        url: secure_url 
+                    }, (err, data) => {
+                        if (err) {
+
+                            console.log(err)
+                            res.sendStatus(500);
+                        } else {
+                            res.sendStatus(204);
+                        }
+                    })
+                })
+                .catch(err => console.log(err))
+
+
+
         }
 
 
