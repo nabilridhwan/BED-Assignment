@@ -7,28 +7,10 @@ const path = require("path");
 
 const multer = require('multer');
 const ProductImages = require('../models/ProductImages');
-const uploadFileToCloudinary = require('../utils/cloudinary');
-const fs = require('fs');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dirOfFile = path.join(__dirname, "../tmp")
-        if (!fs.existsSync(dirOfFile)) {
-            fs.mkdirSync(dirOfFile);
-        }
-
-        cb(null, dirOfFile);
-    },
-
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        let filetype = file.mimetype.split('/')[1];
-        cb(null, `p_${uniqueSuffix}.${filetype}`)
-    }
-})
+const Cloudinary = require('../utils/cloudinary');
 
 const upload = multer({
-    storage: storage,
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 1000000
     },
@@ -150,46 +132,67 @@ router.post("/:productId/image", (req, res) => {
         } else {
 
             const files = req.files;
+
+            // Check if there are files, otherwise return an error
             if (!files) {
                 return res.status(400).send("There is/are no image(s) provided.")
             }
 
-            ProductImages.deleteImagesByProductId(req.params.productId, (err, data) => {
+            ProductImages.getPublicId(req.params.productId, (err, data) => {
                 if (err) {
-                    return res.sendStatus(500);
+                    return res.status(500).send(err);
                 }
-                files.forEach(({
-                    filename
-                }, index) => {
-                    const dirToFile = path.join(__dirname, "../tmp", filename);
-                    uploadFileToCloudinary(dirToFile, "product_images")
-                        .then(data => {
 
-                            fs.unlinkSync(dirToFile);
-                            
+                if (data.length > 0) {
+                    // There are public ids for the product, so we need to delete them
+                    const arrayOfPublicIds = data.map(image => image.public_id);
+                    arrayOfPublicIds.forEach(async (public_id) => {
+                        try {
+                            let data = await Cloudinary.deleteFileFromCloudinary(public_id);
+
+                            if (data.result == "ok") {
+                                console.log("Deleted image from cloudinary")
+                            } else {
+                                console.log("Could not delete image from cloudinary")
+                            }
+                        } catch (error) {
+                            return res.status(500).send(error)
+                        }
+
+                    })
+                }
+
+                ProductImages.deleteImagesByProductId(req.params.productId, (err, data) => {
+                    if(err){
+                        return res.status(500).send(err);
+                    }
+
+                    files.forEach(async file => {
+                        // Try to upload file
+                        try {
+                            let data = await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
                             const {
-                                secure_url
+                                secure_url,
+                                public_id
                             } = data
                             ProductImages.insertProductImage({
                                 ...req.params,
-                                url: secure_url
+                                url: secure_url,
+                                public_id
                             }, (err, data) => {
                                 if (err) {
+                                    console.log(err)
                                     return res.sendStatus(500);
                                 }
                             })
+                        } catch (err) {
+                            return res.status(500).send(err)
+                        }
+                    })
 
-                        })
-                        .catch(error => res.status(500).send(error))
-
-                    if (index == files.length - 1) {
-                        return res.sendStatus(204);
-                    }
+                    res.sendStatus(204);
                 })
-
             })
-
-
         }
     })
 })

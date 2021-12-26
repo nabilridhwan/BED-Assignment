@@ -1,7 +1,28 @@
 const db = require('../config/db');
 
 const ProductImages = {
+    getPublicId: ({
+        productid
+    }, callback) => {
+        userid = userid || null;
 
+        var dbConn = db.getConnection();
+        // Insert into the image table first
+        dbConn.connect(function (err) {
+            if (err) {
+                return callback(err, null);
+            } else {
+                const sql = "SELECT public_id from product_images WHERE productid = ?"
+                dbConn.query(sql, [productid], (err, result) => {
+                    if (err) {
+                        return callback(err, null);
+                    }
+                    return callback(null, result)
+                })
+
+            }
+        })
+    },
     getImageByProductId: ({
         productId
     }, callback) => {
@@ -57,10 +78,30 @@ const ProductImages = {
 
     },
 
+    getPublicId: (productid, callback) => {
+        let dbConn = db.getConnection();
+        dbConn.connect(function (err) {
+            if (err) {
+                return callback(err, null);
+            } else {
+                const sql = "SELECT public_id from product_images WHERE productid = ?"
+                dbConn.query(sql, [productid], (err, result) => {
+                    if (err) {
+                        return callback(err, null);
+                    }
+                    return callback(null, result)
+                })
+
+            }
+        })
+    },
+
     insertProductImage: ({
         productId,
-        url
+        url,
+        public_id
     }, callback) => {
+        // TODO: Null checking
         var dbConn = db.getConnection();
 
         // Insert into the image table first
@@ -69,10 +110,10 @@ const ProductImages = {
                 return callback(err, null);
             } else {
 
-                const sql = "INSERT INTO product_images(productid, url) VALUES(?, ?)"
+                const sql = "INSERT INTO product_images(productid, url, public_id) VALUES(?,?, ?)"
 
                 // Inserts into the database
-                dbConn.query(sql, [productId, url], (err, result) => {
+                dbConn.query(sql, [productId, url, public_id], (err, result) => {
 
                     dbConn.end()
                     if (err) {

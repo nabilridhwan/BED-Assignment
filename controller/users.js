@@ -3,30 +3,11 @@ const router = express.Router();
 const Users = require('../models/users.js');
 
 const multer = require("multer")
-const path = require("path");
 const ProfilePictureImages = require('../models/ProfilePictureImages.js');
-const uploadFileToCloudinary = require('../utils/cloudinary.js');
-const fs = require('fs');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const dirOfFile = path.join(__dirname, "../tmp")
-
-        if (!fs.existsSync(dirOfFile)) {
-            fs.mkdirSync(dirOfFile);
-        }
-        cb(null, dirOfFile);
-    },
-
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        let filetype = file.mimetype.split('/')[1];
-        cb(null, `pfp_${uniqueSuffix}.${filetype}`)
-    }
-})
+const Cloudinary = require('../utils/cloudinary.js');
 
 const upload = multer({
-    storage: storage,
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 1000000
     },
@@ -37,7 +18,7 @@ const upload = multer({
             cb(new Error("The file is not a jpeg, jpg or png file"));
         }
     }
-}).single('profile_picture')
+}).single("profile_picture")
 
 // Endpoint 1: POST users 
 router.post("/users", (req, res) => {
@@ -129,70 +110,77 @@ router.put("/users/:id", (req, res) => {
 
 // User profile image url
 
-router.post("/users/:userid/image", upload, (req, res) => {
+router.post("/users/:userid/image", (req, res) => {
 
-    console.log()
-    // Upload an image for a specific product
-    // Insert the page
-
-    upload(req, res, function (err) {
-
-        // Holds the directory of file
-
-        // Error handling for if there is one, however, send a status code of 500
+    upload(req, res, (err) => {
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
             res.status(500).send(err.message);
         } else {
-
             // If there is no file, return with a status code of 400 indicating a bad request
             if (!req.file) {
                 return res.status(400).send("There is no image provided");
             }
 
-            const {
-                filename
-            } = req.file;
+            // Get public id of the user's profile picture
+            ProfilePictureImages.getPublicId({
+                userid: req.params.userid
+            }, async (err, result) => {
+                if (err) {
+                    return res.sendStatus(500);
+                }
 
-            const dirOfFile = path.join(__dirname, "../tmp", filename)
+                // Delete the image from cloudinary if public id is found
+                if (result.length > 0) {
+                    let arrayOfPublicIds = result[0].public_id
+                    try {
+                        // There is a public id! Proceed to delete it!
+                        let data = await Cloudinary.deleteFileFromCloudinary(arrayOfPublicIds)
+                        // Deleted successfully
+                        if (data.result == "ok") {
+                            console.log("Deleted profile picture from cloudinary successfully")
+                        } else {
+                            console.log("No profile picture found in cloudinary... Adding one!")
+                        }
+                    } catch (error) {
+                        return res.status(500).send(error);
+                    }
+                }
 
-            uploadFileToCloudinary(dirOfFile, "profile_pictures")
-                .then(data => {
+                // Upload the image to cloudinary
+                // Update or insert the profile picture
+
+                try {
+                    let data = await Cloudinary.uploadFileToCloudinary(req, "profile_pictures");
                     const {
+                        public_id,
                         secure_url
                     } = data;
-
-                    // Delete the file from the directory
-                    fs.unlink(dirOfFile, (err) => {
-                        if (err) {
-                            console.log(err)
-                        }
-                    })
 
                     // Insert into database
                     ProfilePictureImages.insertProfilePicture({
                         ...req.params,
-                        url: secure_url 
+                        url: secure_url,
+                        public_id
                     }, (err, data) => {
                         if (err) {
-
                             console.log(err)
                             res.sendStatus(500);
                         } else {
+                            console.log("Nice! Inserted profile picture into database successfully")
                             res.sendStatus(204);
                         }
                     })
-                })
-                .catch(err => {
-                    return res.status(500).send(err);
-                })
+                } catch (error) {
+                    return res.status(500).send(error);
 
-
-
+                }
+            })
         }
-
-
     })
+
+
+
 })
 
 module.exports = router;

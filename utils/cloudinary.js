@@ -8,19 +8,36 @@ cloudinary.config({
     
 }) 
 
-const uploadFileToCloudinary = (filepath, cloudinaryFolderName) => {
+const uploadFileToCloudinary = (buffer, cloudinaryFolderName) => {
     return new Promise(function (resolve, reject) {
         //Create a powerful, writable stream object which works with Cloudinary
-        cloudinary.uploader.upload(filepath, {
+        let stream = cloudinary.uploader.upload_stream({
             folder: cloudinaryFolderName,
             allowed_formats: "png,jpg",
-            resource_type: "image",
-        }).then(result => {
-            resolve(result)
-        }).catch(error => {
-            reject(error)
+            resource_type: "image"
+        },(error, result) => {
+            if(result){
+                resolve(result)
+            }else{
+                reject(error)
+            }
         })
+
+        streamifier.createReadStream(buffer).pipe(stream);
+        
     }); //End of Promise 
 }
 
-module.exports = uploadFileToCloudinary
+const deleteFileFromCloudinary = (publicId) => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(publicId, (error, result) => {
+            if(result){
+                resolve(result)
+            }else{
+                reject(error)
+            }
+        })
+    })
+}
+
+module.exports = {uploadFileToCloudinary, deleteFileFromCloudinary} 
