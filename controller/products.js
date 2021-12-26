@@ -180,7 +180,7 @@ router.post("/:productId/image", (req, res) => {
                             })
 
                         })
-                        .catch(error => console.log(error))
+                        .catch(error => res.status(500).send(error))
 
                     if (index == files.length - 1) {
                         return res.sendStatus(204);
