@@ -3,13 +3,11 @@ const db = require('../config/db');
 const ProfilePictureImages = {
     insertProfilePicture: ({
         userid,
-        filename
+       url 
     }, callback) => {
         var dbConn = db.getConnection();
-
         userid = userid || null;
-
-        filename = filename || null;
+        url = url || null;
 
         // Insert into the image table first
         dbConn.connect(function (err) {
@@ -17,8 +15,8 @@ const ProfilePictureImages = {
                 return callback(err, null);
             } else {
 
-                const sql = "INSERT INTO profile_picture_images(userid, filename) VALUES(?, ?)"
-                dbConn.query(sql, [userid, filename], (err, result) => {
+                const sql = "INSERT INTO profile_picture_images(userid, url) VALUES(?, ?)"
+                dbConn.query(sql, [userid, url], (err, result) => {
 
                     if (err) {
                         return callback(err, null);
@@ -27,14 +25,8 @@ const ProfilePictureImages = {
                     // const {insertId} = result;
                     const secondSql = "UPDATE users SET profile_pic_url = ? WHERE userid = ?"
 
-                    const imageUrl = `http://localhost:8080/images/${filename}`
-
-                    console.log(filename)
-                    console.log(imageUrl)
-                    console.log(userid)
-
                     // Update the table id;
-                    dbConn.query(secondSql, [imageUrl, userid], (err, result) => {
+                    dbConn.query(secondSql, [url, userid], (err, result) => {
                         dbConn.end()
                         if (err) {
                             return callback(err, null);

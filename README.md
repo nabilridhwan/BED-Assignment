@@ -5,3 +5,4 @@
 - Endpoint for inserting images to a product
 - Endpoint for changing a user's profile picture
 - Rate limiting per IP (100 requests/15 mins)
+- Cloudinary implementation for uploading of images (both users and products)

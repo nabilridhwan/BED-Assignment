@@ -12,8 +12,9 @@ const ProductImages = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT i.filename FROM products p, product_images i WHERE p.productid = i.productid AND p.productid = ?;"
+                const sql = "SELECT i.url FROM products p, product_images i WHERE p.productid = i.productid AND p.productid = ?;"
                 dbConn.query(sql, [productId], (err, result) => {
+
                     dbConn.end()
 
                     if (err) {
@@ -29,13 +30,9 @@ const ProductImages = {
 
     },
 
-    insertProductImages: ({
-        productId,
-        fileObject
-    }, callback) => {
-        var dbConn = db.getConnection();
+    deleteImagesByProductId: (productId, callback) => {
 
-        // Insert into the image table first
+        var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 return callback(err, null);
@@ -46,46 +43,45 @@ const ProductImages = {
 
                 dbConn.query(deleteSql, [productId], (err, result) => {
 
+                    dbConn.end()
+
                     if (err) {
-                        console.log(err)
                         return callback(err, null);
                     } else {
+                        return callback(null, result)
+                    }
 
+                })
+            }
+        })
 
-                        let sqlQueryError = false;
-                        const sql = "INSERT INTO product_images(productid, filename) VALUES(?, ?)"
+    },
 
-                        // The for loop iterates over every filename in the file object (which is an array)
-                        fileObject.forEach(({
-                            filename
-                        }, index) => {
+    insertProductImage: ({
+        productId,
+        url
+    }, callback) => {
+        var dbConn = db.getConnection();
 
-                            // Inserts into the database
-                            dbConn.query(sql, [productId, filename], (err, result) => {
+        // Insert into the image table first
+        dbConn.connect(function (err) {
+            if (err) {
+                return callback(err, null);
+            } else {
 
-                                // Check if there is an error
-                                if (err) {
-                                    sqlQueryError = true;
-                                    // callback(err, null);
-                                }
+                const sql = "INSERT INTO product_images(productid, url) VALUES(?, ?)"
 
-                                // Check if the loop is done
-                                if (index == fileObject.length - 1) {
-                                    // Checks for the error, if error, returns callback error or else success
-                                    if (sqlQueryError) {
-                                        callback(err, null);
-                                    } else {
-                                        return callback(null, 'success')
+                // Inserts into the database
+                dbConn.query(sql, [productId, url], (err, result) => {
 
-                                    }
-                                }
-                            })
-                        })
-
-                        // End the connection after the for loop!
-                        dbConn.end()
+                    dbConn.end()
+                    if (err) {
+                        callback(err, null);
+                    } else {
+                        return callback(null, 'success')
                     }
                 })
+
             }
         })
     },
