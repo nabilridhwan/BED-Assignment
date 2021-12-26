@@ -7,10 +7,17 @@ const path = require("path");
 
 const multer = require('multer');
 const ProductImages = require('../models/ProductImages');
+const uploadFileToCloudinary = require('../utils/cloudinary');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, "../public/images"));
+        const dirOfFile = path.join(__dirname, "../tmp")
+        if (!fs.existsSync(dirOfFile)) {
+            fs.mkdirSync(dirOfFile);
+        }
+
+        cb(null, dirOfFile);
     },
 
     filename: function (req, file, cb) {
@@ -138,7 +145,7 @@ router.post("/:productId/image", (req, res) => {
         // Error handling for 
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
-            if (err.message == "Unexpected field") err.message = "There is a maximum limit of 5 images per product"
+            if (err.message == "Unexpected field") err.message = "product_images field not found or there is a maximum limit of 5 images per product"
             return res.status(500).send(err.message);
         } else {
 
@@ -147,17 +154,42 @@ router.post("/:productId/image", (req, res) => {
                 return res.status(400).send("There is/are no image(s) provided.")
             }
 
-            ProductImages.insertProductImages({
-                ...req.params,
-                fileObject: files
-            }, (err, data) => {
+            ProductImages.deleteImagesByProductId(req.params.productId, (err, data) => {
                 if (err) {
-                    console.log(err);
                     return res.sendStatus(500);
-                } else {
-                    return res.sendStatus(204);
                 }
+                files.forEach(({
+                    filename
+                }, index) => {
+                    const dirToFile = path.join(__dirname, "../tmp", filename);
+                    uploadFileToCloudinary(dirToFile, "product_images")
+                        .then(data => {
+
+                            fs.unlinkSync(dirToFile);
+                            
+                            const {
+                                secure_url
+                            } = data
+                            ProductImages.insertProductImage({
+                                ...req.params,
+                                url: secure_url
+                            }, (err, data) => {
+                                if (err) {
+                                    return res.sendStatus(500);
+                                }
+                            })
+
+                        })
+                        .catch(error => console.log(error))
+
+                    if (index == files.length - 1) {
+                        return res.sendStatus(204);
+                    }
+                })
+
             })
+
+
         }
     })
 })
@@ -172,7 +204,7 @@ router.get("/:productId/image", (req, res) => {
 
             if (data.length > 0) {
                 res.status(200)
-                res.json(data.map(data => data.filename))
+                res.json(data.map(data => data.url))
             } else {
                 res.sendStatus(404);
             }
