@@ -4,7 +4,7 @@ const ProductImages = {
     getPublicId: ({
         productid
     }, callback) => {
-        userid = userid || null;
+        productid = productid || null;
 
         var dbConn = db.getConnection();
         // Insert into the image table first
@@ -26,6 +26,7 @@ const ProductImages = {
     getImageByProductId: ({
         productId
     }, callback) => {
+        productId = productId || null;
 
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
@@ -52,6 +53,7 @@ const ProductImages = {
     },
 
     deleteImagesByProductId: (productId, callback) => {
+        productId = productId || null;
 
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
@@ -79,6 +81,7 @@ const ProductImages = {
     },
 
     getPublicId: (productid, callback) => {
+        productid = productid || null;
         let dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -101,8 +104,10 @@ const ProductImages = {
         url,
         public_id
     }, callback) => {
-        // TODO: Null checking
         var dbConn = db.getConnection();
+        productId = productId || null;
+        url = url || null;
+        public_id = public_id || null;
 
         // Insert into the image table first
         dbConn.connect(function (err) {
