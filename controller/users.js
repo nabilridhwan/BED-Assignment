@@ -1,15 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Users = require('../models/users.js');
-const os = require('os');
 
 const multer = require("multer")
 const path = require("path");
 const ProfilePictureImages = require('../models/ProfilePictureImages.js');
-const {
-    CLIENT_IGNORE_SIGPIPE
-} = require('mysql/lib/protocol/constants/client');
-const uploadStreamToCloudinary = require('../utils/cloudinary.js');
 const uploadFileToCloudinary = require('../utils/cloudinary.js');
 const fs = require('fs');
 
