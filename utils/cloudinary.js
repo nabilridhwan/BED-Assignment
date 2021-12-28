@@ -5,8 +5,7 @@ cloudinary.config({
     cloud_name: "dqxawxewb",
     api_key: "534278375837782",
     api_secret: "vpVQp-rWDoF5IC68oJCzAS8fDR8",
-    
-}) 
+})
 
 const uploadFileToCloudinary = (buffer, cloudinaryFolderName) => {
     return new Promise(function (resolve, reject) {
@@ -15,29 +14,32 @@ const uploadFileToCloudinary = (buffer, cloudinaryFolderName) => {
             folder: cloudinaryFolderName,
             allowed_formats: "png,jpg",
             resource_type: "image"
-        },(error, result) => {
-            if(result){
+        }, (error, result) => {
+            if (result) {
                 resolve(result)
-            }else{
+            } else {
                 reject(error)
             }
         })
 
         streamifier.createReadStream(buffer).pipe(stream);
-        
+
     }); //End of Promise 
 }
 
 const deleteFileFromCloudinary = (publicId) => {
     return new Promise((resolve, reject) => {
         cloudinary.uploader.destroy(publicId, (error, result) => {
-            if(result){
+            if (result) {
                 resolve(result)
-            }else{
+            } else {
                 reject(error)
             }
         })
     })
 }
 
-module.exports = {uploadFileToCloudinary, deleteFileFromCloudinary} 
+module.exports = {
+    uploadFileToCloudinary,
+    deleteFileFromCloudinary,
+}
