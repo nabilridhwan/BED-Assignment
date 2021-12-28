@@ -4,6 +4,11 @@ const router = express.Router();
 const Interest = require("../models/interest");
 
 router.post("/:userid", (req, res) => {
+
+    if(isNaN(req.params.userid)){
+        return res.status(400).send("The User ID provided must be a number")
+    }
+    
     Interest.insertInterests({
         ...req.params,
         ...req.body
@@ -30,6 +35,11 @@ router.get("/", (req, res) => {
 })
 
 router.get("/:userid", (req, res) => {
+
+    if(isNaN(req.params.userid)){
+        return res.status(400).send("The User ID provided must be a number")
+    }
+    
     Interest.getInterestsById({
         ...req.params
     }, (err, data) => {

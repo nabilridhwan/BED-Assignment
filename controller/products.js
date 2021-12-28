@@ -39,7 +39,11 @@ router.post("/", (req, res) => {
 
     Product.insertProduct(req.body, (err, data) => {
         if (err) {
-            res.sendStatus(500);
+            console.error(err)
+            if (err.errno == 1062) {
+                return res.status(422).send("The product name provided already exists");
+            }
+            return res.sendStatus(500);
 
         } else {
             res.status(201).json({
@@ -51,6 +55,12 @@ router.post("/", (req, res) => {
 
 // Endpoint 8: GET /product/:id
 router.get("/:id", (req, res) => {
+
+    if (isNaN(req.params.id)) {
+        return res.status(400).send("The Product ID provided must be a number")
+    }
+
+
     Product.getProduct({
         id: req.params.id
     }, (err, product) => {
@@ -64,6 +74,12 @@ router.get("/:id", (req, res) => {
 })
 // Endpoint 9: DELETE /product/:id
 router.delete("/:id", (req, res) => {
+
+    if (isNaN(req.params.id)) {
+        return res.status(400).send("The Product ID provided must be a number")
+    }
+
+
     Product.deleteProduct({
         id: req.params.id
     }, (err, product) => {
@@ -81,6 +97,11 @@ router.delete("/:id", (req, res) => {
 
 // Endpoint 10: POST /product/:id/review/
 router.post("/:id/review", (req, res) => {
+
+    if (isNaN(req.params.id)) {
+        return res.status(400).send("The Product ID provided must be a number")
+    }
+
     Reviews.insertReview({
         productid: req.params.id,
         ...req.body
@@ -102,6 +123,11 @@ router.post("/:id/review", (req, res) => {
 
 // Endpoint 11: GET /product/:id/reviews
 router.get("/:id/reviews", (req, res) => {
+
+    if (isNaN(req.params.id)) {
+        return res.status(400).send("The Product ID provided must be a number")
+    }
+
     Product.getReviewsForProduct({
         ...req.params
     }, (err, data) => {
@@ -120,10 +146,12 @@ router.get("/:id/reviews", (req, res) => {
 
 // Upload an image for a specific product
 router.post("/:productId/image", (req, res) => {
+
+    if (isNaN(req.params.productId)) {
+        return res.status(400).send("The Product ID provided must be a number")
+    }
     // Insert the page
     upload(req, res, function (err) {
-
-
         // Error handling for 
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
@@ -162,37 +190,64 @@ router.post("/:productId/image", (req, res) => {
                     })
                 }
 
-                ProductImages.deleteImagesByProductId(req.params.productId, (err, data) => {
-                    if(err){
+                ProductImages.deleteImagesByProductId(req.params.productId, async (err, data) => {
+                    if (err) {
                         return res.status(500).send(err);
                     }
 
-                    files.forEach(async (file, index) => {
-                        // Try to upload file
-                        try {
-                            let data = await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
-                            const {
-                                secure_url,
-                                public_id
-                            } = data
-                            ProductImages.insertProductImage({
-                                ...req.params,
-                                url: secure_url,
-                                public_id
-                            }, (err, data) => {
-                                if (err) {
-                                    console.log(err)
-                                    return res.sendStatus(500);
-                                }
-                            })
-                        } catch (err) {
-                            return res.status(500).send(err)
-                        }
+                    // Try to upload file
+                    try {
 
-                        if(index == files.length - 1){
-                            return res.sendStatus(204);
-                        }
-                    })
+                        Product.getProduct({
+                            id: req.params.productId
+                        }, async (err, product) => {
+                            if (err) {
+                                return res.status(500).send(err)
+                            } else {
+
+                                // If the product exits, we can upload the images
+                                if (product.length > 0) {
+                                    let allImagesUploaded = files.map(async file => {
+                                        return await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
+                                    })
+
+                                    let imagesResponse = await Promise.all(allImagesUploaded);
+
+                                    await ProductImages.insertProductImages({
+                                        ...req.params,
+                                        fileObjectArray: imagesResponse
+                                    }, (err, data) => {
+                                        if (err) {
+                                            return res.status(500).send(err);
+                                        } else {
+                                            return res.sendStatus(204);
+                                        }
+                                    })
+
+
+                                } else {
+                                    return res.status(404).send("Product not found")
+                                }
+                            }
+                        })
+
+                        // const {
+                        //     secure_url,
+                        //     public_id
+                        // } = data
+                        // ProductImages.insertProductImage({
+                        //     ...req.params,
+                        //     url: secure_url,
+                        //     public_id
+                        // }, (err, data) => {
+                        //     if (err) {
+                        //         console.log(err)
+                        //         return res.sendStatus(500);
+                        //     }
+                        // })
+                    } catch (err) {
+                        return res.status(500).send(err)
+                    }
                 })
             })
         }

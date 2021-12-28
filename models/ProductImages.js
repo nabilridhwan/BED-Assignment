@@ -99,34 +99,45 @@ const ProductImages = {
         })
     },
 
-    insertProductImage: ({
+    insertProductImages: async ({
         productId,
-        url,
-        public_id
+        fileObjectArray
     }, callback) => {
         var dbConn = db.getConnection();
         productId = productId || null;
-        url = url || null;
-        public_id = public_id || null;
 
         // Insert into the image table first
-        dbConn.connect(function (err) {
+        dbConn.connect(async function (err) {
             if (err) {
                 return callback(err, null);
             } else {
 
-                const sql = "INSERT INTO product_images(productid, url, public_id) VALUES(?,?, ?)"
+                const fileObjectPromises = fileObjectArray.map(fileObject => {
+                    return new Promise((resolve, reject) => {
+                        const sql = "INSERT INTO product_images(productid, url, public_id) VALUES(?,?, ?)"
+                        // Inserts into the database
+                        dbConn.query(sql, [productId, fileObject.secure_url, fileObject.public_id], (err, result) => {
 
-                // Inserts into the database
-                dbConn.query(sql, [productId, url, public_id], (err, result) => {
-
-                    dbConn.end()
-                    if (err) {
-                        callback(err, null);
-                    } else {
-                        return callback(null, 'success')
-                    }
+                            if (err) {
+                                reject(err)
+                            } else {
+                                resolve(true)
+                            }
+                        })
+                    })
                 })
+
+                // Make sure the promises are met
+                await Promise.all(fileObjectPromises)
+                    .then(data => {
+                        return callback(null, true)
+                    })
+                    .catch(error => {
+                        return callback(error, null)
+                    })
+                    .finally(() => {
+                        dbConn.end()
+                    })
 
             }
         })

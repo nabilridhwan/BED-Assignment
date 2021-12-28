@@ -1,7 +1,6 @@
 const db = require('../config/db');
 
 const ProfilePictureImages = {
-
     getPublicId: ({
         userid
     }, callback) => {
@@ -15,6 +14,7 @@ const ProfilePictureImages = {
             } else {
                 const sql = "SELECT public_id from profile_picture_images WHERE userid = ?"
                 dbConn.query(sql, [userid], (err, result) => {
+                    dbConn.end();
                     if (err) {
                         return callback(err, null);
                     }
@@ -24,11 +24,31 @@ const ProfilePictureImages = {
             }
         })
     },
+
+    deleteAllProfilePictures: ({
+        userid
+    }, callback) => {
+        const sql = "DELETE FROM profile_picture_images WHERE userid = ?"
+
+        var dbConn = db.getConnection();
+        dbConn.query(sql, [userid], (err, result) => {
+            dbConn.end()
+            if (err) {
+                return callback(err, null);
+            }
+            console.log("Deleted from profile_picture_images table successfully")
+
+            return callback(null, null);
+        })
+
+    },
+
     insertProfilePicture: ({
         userid,
         url,
         public_id
     }, callback) => {
+        console.log("Insert function")
         var dbConn = db.getConnection();
         userid = userid || null;
         url = url || null;
@@ -39,36 +59,20 @@ const ProfilePictureImages = {
             if (err) {
                 return callback(err, null);
             } else {
-                // See if there is a record, if none, then insert
-                const sql = "SELECT * from profile_picture_images WHERE userid = ?";
-                dbConn.query(sql, [userid], (err, result) => {
+                // Insert into the image table first
+                const sql = "INSERT INTO profile_picture_images (userid, url, public_id) VALUES (?, ?, ?)"
+                dbConn.query(sql, [userid, url, public_id], (err, result) => {
+
+                    dbConn.end();
                     if (err) {
+                        console.log("Error inserting into profile_picture_images table")
                         return callback(err, null);
                     }
-                    if (result.length == 0) {
-                        console.log("No record found in database. Inserting new data!")
-                        // Insert into the table
-                        const insertSql = "INSERT INTO profile_picture_images (userid, url, public_id) VALUES (?, ?, ?)";
-                        dbConn.query(insertSql, [userid, url, public_id], (err, result) => {
-                            dbConn.end()
-                            if (err) {
-                                return callback(err, null);
-                            }
-                            return callback(null, result)
-                        })
-                    } else {
-                        console.log("Found row in database. Updating data!")
-                        // Update the table
-                        const updateSql = "UPDATE profile_picture_images SET url = ?, public_id = ? WHERE userid = ?";
-                        dbConn.query(updateSql, [url, public_id, userid], (err, result) => {
-                            dbConn.end();
-                            if (err) {
-                                return callback(err, null);
-                            }
-                            return callback(null, result)
-                        })
-                    }
+
+                    console.log("Inserted into profile_picture_images table successfully")
+                    return callback(null, result)
                 })
+
             }
         })
     }

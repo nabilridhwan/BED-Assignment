@@ -65,7 +65,6 @@ router.get("/users/:id", (req, res) => {
         }, (err, users) => {
             if (err) {
                 res.sendStatus(500);
-
             } else {
                 if (users.length == 0) {
                     res.sendStatus(404);
@@ -96,26 +95,32 @@ router.put("/users/:id", (req, res) => {
                 console.log(err)
                 if (err.errno === 1062) {
                     res.status(422).send("The new username OR new email provided already exists.")
-                } else if (err.errno === -1) {
-                    res.sendStatus(404);
                 } else {
                     res.sendStatus(500);
                 }
             } else {
-                res.sendStatus(204);
+                if (data.length > 0) {
+                    res.sendStatus(204);
+                } else {
+                    res.sendStatus(404);
+                }
             }
         })
     }
 })
 
 // User profile image url
-
 router.post("/users/:userid/image", (req, res) => {
+
+    // Check if req.params.userid is a number
+    if(isNaN(req.params.userid)){
+        return res.status(400).send("The User ID provided must be a number")
+    }
 
     upload(req, res, (err) => {
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
-            res.status(500).send(err.message);
+            return res.status(500).send(err.message);
         } else {
             // If there is no file, return with a status code of 400 indicating a bad request
             if (!req.file) {
@@ -151,24 +156,58 @@ router.post("/users/:userid/image", (req, res) => {
                 // Update or insert the profile picture
 
                 try {
-                    let data = await Cloudinary.uploadFileToCloudinary(req, "profile_pictures");
-                    const {
-                        public_id,
-                        secure_url
-                    } = data;
-
-                    // Insert into database
-                    ProfilePictureImages.insertProfilePicture({
-                        ...req.params,
-                        url: secure_url,
-                        public_id
-                    }, (err, data) => {
+                    Users.getUser({
+                        id: req.params.userid
+                    }, async (err, result) => {
                         if (err) {
-                            console.log(err)
-                            res.sendStatus(500);
+                            return res.sendStatus(500);
+                        }
+
+                        // If user is found
+                        if (result.length > 0) {
+                            let data = await Cloudinary.uploadFileToCloudinary(req.file.buffer, "profile_pictures");
+                            const {
+                                public_id,
+                                secure_url
+                            } = data;
+
+                            ProfilePictureImages.deleteAllProfilePictures({
+                                ...req.params
+                            }, (err, data) => {
+                                if (err) {
+                                    return res.sendStatus(500);
+                                } else {
+                                    // Insert into database
+                                    ProfilePictureImages.insertProfilePicture({
+                                        ...req.params,
+                                        url: secure_url,
+                                        public_id
+                                    }, (err, data) => {
+                                        if (err) {
+                                            return res.status(500).send(err);
+                                        } else {
+                                            console.log("Nice! Inserted profile picture into database successfully")
+
+                                            Users.updateProfilePictureUrl({
+                                                ...req.params,
+                                                profile_pic_url: secure_url
+                                            }, (err, data) => {
+                                                if (err) {
+                                                    return res.sendStatus(500)
+                                                } else {
+                                                    console.log("Successfully updated profile picture url in database")
+                                                    return res.sendStatus(204)
+                                                }
+                                            })
+
+                                        }
+                                    })
+
+                                }
+                            })
+
                         } else {
-                            console.log("Nice! Inserted profile picture into database successfully")
-                            res.sendStatus(204);
+                            res.sendStatus(404)
                         }
                     })
                 } catch (error) {
