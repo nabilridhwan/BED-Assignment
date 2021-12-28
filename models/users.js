@@ -13,7 +13,7 @@ const userDB = {
                     dbConn.end()
 
                     if (err) {
-                        callback(err);
+                        return callback(err);
                     } else {
                         return callback(err, result)
                     }
@@ -113,11 +113,39 @@ const userDB = {
                     if (err) {
                         callback(err);
                     } else {
-                        if(result.affectedRows == 0){
-                            return callback({errno: -1}, null)
-                        }else{
+                        // TODO: Move this to controller
+                        if (result.affectedRows == 0) {
+                            return callback({
+                                errno: -1
+                            }, null)
+                        } else {
                             return callback(err, result)
                         }
+                    }
+                })
+            }
+        })
+    },
+
+    updateProfilePictureUrl: ({
+        profile_pic_url,
+        userid
+    }, callback) => {
+        userid = userid || null;
+        profile_pic_url = profile_pic_url || null;
+
+        const dbConn = db.getConnection();
+        dbConn.connect(function (err) {
+            if (err) {
+                callback(err, null);
+            } else {
+                const sql = "UPDATE users SET profile_pic_url = ? where userid = ?"
+                dbConn.query(sql, [profile_pic_url, userid], (err, result) => {
+                    dbConn.end()
+                    if (err) {
+                        callback(err);
+                    } else {
+                        return callback(err, result)
                     }
                 })
             }
