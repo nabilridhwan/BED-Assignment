@@ -113,14 +113,7 @@ const userDB = {
                     if (err) {
                         callback(err);
                     } else {
-                        // TODO: Move this to controller
-                        if (result.affectedRows == 0) {
-                            return callback({
-                                errno: -1
-                            }, null)
-                        } else {
-                            return callback(err, result)
-                        }
+                        return callback(err, result)
                     }
                 })
             }
