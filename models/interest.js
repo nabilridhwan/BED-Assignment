@@ -56,41 +56,44 @@ const Interest = {
         categoryids
     }, callback) => {
         userid = userid || null;
-        categoryids = categoryids ? categoryids.replace(/\s/g, '').split(',') : null;
-
-        console.log(categoryids)
+        categoryids = categoryids != null && categoryids.length > 0 ? categoryids.replace(/\s/g, '').split(',') : null;
 
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
                 callback(err, null);
             } else {
-                let sqlQueryError = false;
-                const sql = "INSERT INTO interest(userid, categoryid) VALUES(?,?)"
-                if(categoryids != null){
-                    categoryids.forEach((categoryId, index) => {
-                        dbConn.query(sql, [userid, categoryId], (err, result) => {
-                            if (err) {
-                                sqlQueryError = true;
-                            }
-    
-                            // Check if the loop is done
-                            if (index == categoryids.length - 1) {
-    
-                                // Checks for the error, if error, returns callback error or else success
-                                if (sqlQueryError) {
-                                    callback(err, null);
+                if (categoryids != null) {
+
+
+                    const sql = "INSERT INTO interest(userid, categoryid) VALUES(?,?)"
+                    let categoryPromises = categoryids.map(categoryId => {
+                        return new Promise((resolve, reject) => {
+
+                            dbConn.query(sql, [userid, categoryId], (err, result) => {
+
+                                if (err) {
+                                    reject(err)
                                 } else {
-                                    return callback(null, 'success')
-    
+                                    resolve(result)
                                 }
-                            }
+                            })
                         })
                     })
-                }else{
+
+                    Promise.all(categoryPromises)
+                        .then(data => {
+                            return callback(null, data);
+                        }).catch(e => {
+                            console.log("Error", e)
+                            return callback(e, null)
+                        }).finally(() => {
+                            dbConn.end()
+                        })
+
+                } else {
                     callback(true, null);
                 }
-                dbConn.end()
             }
         })
     },

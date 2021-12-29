@@ -265,7 +265,7 @@ router.post("/:productId/image", (req, res) => {
                                 let imagesResponse = await Promise.all(allImagesUploaded);
 
                                 // Insert the images into the database
-                                await ProductImages.insertProductImages({
+                                ProductImages.insertProductImages({
                                     ...req.params,
                                     fileObjectArray: imagesResponse
                                 }, (err, data) => {

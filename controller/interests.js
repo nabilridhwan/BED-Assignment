@@ -19,7 +19,7 @@ router.post("/:userid", (req, res) => {
     }
     
     // Insert the interest
-    Interest.insertInterests({
+   Interest.insertInterests({
         ...req.params,
         ...req.body
     }, (err, data) => {

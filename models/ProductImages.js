@@ -21,6 +21,9 @@ const ProductImages = {
             } else {
                 const sql = "SELECT public_id from product_images WHERE productid = ?"
                 dbConn.query(sql, [productid], (err, result) => {
+
+                    dbConn.end()
+
                     if (err) {
                         return callback(err, null);
                     }
@@ -96,6 +99,8 @@ const ProductImages = {
             } else {
                 const sql = "SELECT public_id from product_images WHERE productid = ?"
                 dbConn.query(sql, [productid], (err, result) => {
+
+                    dbConn.end();
                     if (err) {
                         return callback(err, null);
                     }
@@ -106,22 +111,26 @@ const ProductImages = {
         })
     },
 
-    insertProductImages: async ({
+    insertProductImages: ({
         productId,
         fileObjectArray
     }, callback) => {
         var dbConn = db.getConnection();
         productId = productId || null;
+        fileObjectArray = fileObjectArray || null;
 
         // Insert into the image table first
-        dbConn.connect(async function (err) {
+        dbConn.connect(function (err) {
             if (err) {
                 return callback(err, null);
             } else {
 
+
+                // fileObjectPromises is an array of promises that is resolved when there is no error
+
+                const sql = "INSERT INTO product_images(productid, url, public_id) VALUES(?,?, ?)"
                 const fileObjectPromises = fileObjectArray.map(fileObject => {
                     return new Promise((resolve, reject) => {
-                        const sql = "INSERT INTO product_images(productid, url, public_id) VALUES(?,?, ?)"
                         // Inserts into the database
                         dbConn.query(sql, [productId, fileObject.secure_url, fileObject.public_id], (err, result) => {
 
@@ -134,8 +143,8 @@ const ProductImages = {
                     })
                 })
 
-                // Make sure the promises are met
-                await Promise.all(fileObjectPromises)
+                // Make sure the all the promises are met, if it is met, return callback with no error, else return callback with error and then finally end the connection
+                Promise.all(fileObjectPromises)
                     .then(data => {
                         return callback(null, true)
                     })
