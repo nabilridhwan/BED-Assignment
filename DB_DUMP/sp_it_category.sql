@@ -37,7 +37,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'Laptops','Light and high performance laptops for school'),(3,'Desktops','High performance desktops for more intensive work'),(4,'Mobile Phones','Mobile Phones for calling');
+INSERT INTO `category` VALUES (1,'Laptops','Light and high performance laptops for school'),(3,'Mobile Phones','The latest and greatest in mobile phones!'),(4,'Mice','Mouses!');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:19

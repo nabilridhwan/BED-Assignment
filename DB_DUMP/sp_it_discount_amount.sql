@@ -28,7 +28,7 @@ CREATE TABLE `discount_amount` (
   `discount_amt` double NOT NULL,
   `discount_type` varchar(1) NOT NULL,
   PRIMARY KEY (`discount_amount_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +37,7 @@ CREATE TABLE `discount_amount` (
 
 LOCK TABLES `discount_amount` WRITE;
 /*!40000 ALTER TABLE `discount_amount` DISABLE KEYS */;
-INSERT INTO `discount_amount` VALUES (2,'Halloween Sale',3,'%'),(3,'Chinese New Year Sale',15,'%'),(4,'Clearance sale',15,'%');
+INSERT INTO `discount_amount` VALUES (1,'Clearance sale',15,'%'),(2,'DBS Cardholders',5,'%');
 /*!40000 ALTER TABLE `discount_amount` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:19

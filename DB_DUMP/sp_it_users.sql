@@ -34,7 +34,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`userid`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Terry Tan','terry@gmail.com','91234567','abc123456','Customer','https://res.cloudinary.com/dqxawxewb/image/upload/v1640754640/profile_pictures/xay7syjatv9kxz0a66yg.jpg','2021-12-29 04:44:42'),(3,'John Tan','johntan@gmail.com','91234567','abc123456','Customer','https://res.cloudinary.com/dqxawxewb/image/upload/v1640756075/profile_pictures/je2tuvzfmofbmbizxa3r.jpg','2021-12-29 04:48:50'),(4,'Tom Cruise','tomcruise@gmail.com','91234567','abc123456','Customer','https://www.abc.com/tomcruise.jpg','2021-12-29 05:01:35');
+INSERT INTO `users` VALUES (1,'Terry Tan','terry@gmail.com','91234567','bed123456','Customer','https://www.abc.com/terry.jpg','2021-12-29 16:09:36'),(2,'Mark Tan','mark@gmail.com','91234567','abc123456','Customer','https://res.cloudinary.com/dqxawxewb/image/upload/v1640794582/profile_pictures/aqwzrniwjnvdmhbjvqr8.jpg','2021-12-29 16:09:55');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:20

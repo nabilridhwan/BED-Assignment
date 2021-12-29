@@ -33,7 +33,7 @@ CREATE TABLE `products` (
   UNIQUE KEY `product_name_UNIQUE` (`name`),
   KEY `fk_categoryid_idx` (`categoryid`),
   CONSTRAINT `fk_categoryid` FOREIGN KEY (`categoryid`) REFERENCES `category` (`categoryid`) ON DELETE SET NULL ON UPDATE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'SP AMD Ryzen 3600 Laptop','Best Laptop',1,'SP IT!',1885.5),(3,'Lenovo Legion 5 Pro','Awesome laptop with great cooling!',1,'SP IT!',2350.5);
+INSERT INTO `products` VALUES (1,'SP AMD Ryzen 3600 Laptop','Best Laptop',1,'SP IT!',1855.5);
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:20

@@ -31,7 +31,7 @@ CREATE TABLE `interest` (
   KEY `fk_interest_categoryid_idx` (`categoryid`),
   CONSTRAINT `fk_interest_categoryid` FOREIGN KEY (`categoryid`) REFERENCES `category` (`categoryid`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_interest_userid` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `interest` (
 
 LOCK TABLES `interest` WRITE;
 /*!40000 ALTER TABLE `interest` DISABLE KEYS */;
-INSERT INTO `interest` VALUES (1,1,1),(4,3,1),(5,3,3),(6,4,1),(7,4,3),(9,4,1),(10,4,3),(11,4,4);
+INSERT INTO `interest` VALUES (1,1,1),(4,1,1),(5,1,3),(6,1,4),(7,2,1),(8,2,3);
 /*!40000 ALTER TABLE `interest` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:11
+-- Dump completed on 2021-12-30  0:24:19

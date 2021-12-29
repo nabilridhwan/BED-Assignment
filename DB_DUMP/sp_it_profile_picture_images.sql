@@ -31,7 +31,7 @@ CREATE TABLE `profile_picture_images` (
   PRIMARY KEY (`profilepicid`),
   KEY `fk_userid_idx` (`userid`),
   CONSTRAINT `fk_pfp_userid` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `profile_picture_images` (
 
 LOCK TABLES `profile_picture_images` WRITE;
 /*!40000 ALTER TABLE `profile_picture_images` DISABLE KEYS */;
-INSERT INTO `profile_picture_images` VALUES (1,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640754640/profile_pictures/xay7syjatv9kxz0a66yg.jpg','profile_pictures/xay7syjatv9kxz0a66yg','2021-12-29 05:10:40'),(3,3,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640756075/profile_pictures/je2tuvzfmofbmbizxa3r.jpg','profile_pictures/je2tuvzfmofbmbizxa3r','2021-12-29 05:34:34');
+INSERT INTO `profile_picture_images` VALUES (1,2,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794582/profile_pictures/aqwzrniwjnvdmhbjvqr8.jpg','profile_pictures/aqwzrniwjnvdmhbjvqr8','2021-12-29 16:16:21');
 /*!40000 ALTER TABLE `profile_picture_images` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:20

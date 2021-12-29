@@ -31,7 +31,7 @@ CREATE TABLE `product_images` (
   PRIMARY KEY (`imageid`),
   KEY `fk_productid_image_idx` (`productid`),
   CONSTRAINT `fk_productid_img` FOREIGN KEY (`productid`) REFERENCES `products` (`productid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `product_images` (
 
 LOCK TABLES `product_images` WRITE;
 /*!40000 ALTER TABLE `product_images` DISABLE KEYS */;
-INSERT INTO `product_images` VALUES (9,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640763287/product_images/przdqy1pishmx7qtzek3.jpg','product_images/przdqy1pishmx7qtzek3','2021-12-29 07:34:47'),(10,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640763287/product_images/povlyeyqqpfytde8apwp.jpg','product_images/povlyeyqqpfytde8apwp','2021-12-29 07:34:47');
+INSERT INTO `product_images` VALUES (1,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794722/product_images/kyxgow552lokojhnqk6u.png','product_images/kyxgow552lokojhnqk6u','2021-12-29 16:18:41'),(2,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794722/product_images/s8qzxcsua5dqlwflzvq3.jpg','product_images/s8qzxcsua5dqlwflzvq3','2021-12-29 16:18:41'),(3,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794722/product_images/absfdc2klt4p5uz81bdp.png','product_images/absfdc2klt4p5uz81bdp','2021-12-29 16:18:41'),(4,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794722/product_images/jk3h0motka7ct8re710c.jpg','product_images/jk3h0motka7ct8re710c','2021-12-29 16:18:41'),(5,1,'https://res.cloudinary.com/dqxawxewb/image/upload/v1640794722/product_images/hlde6ahjln2uuqsvq8ev.png','product_images/hlde6ahjln2uuqsvq8ev','2021-12-29 16:18:41');
 /*!40000 ALTER TABLE `product_images` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:19

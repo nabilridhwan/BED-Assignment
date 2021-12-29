@@ -34,7 +34,7 @@ CREATE TABLE `discounts` (
   CONSTRAINT `fk_amount` FOREIGN KEY (`discount_amount_id`) REFERENCES `discount_amount` (`discount_amount_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_date` FOREIGN KEY (`discount_date_id`) REFERENCES `discount_dates` (`discount_date_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_product_id_discount` FOREIGN KEY (`productid`) REFERENCES `products` (`productid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `discounts` (
 
 LOCK TABLES `discounts` WRITE;
 /*!40000 ALTER TABLE `discounts` DISABLE KEYS */;
-INSERT INTO `discounts` VALUES (13,3,2,2),(15,1,4,3),(16,3,4,3);
+INSERT INTO `discounts` VALUES (3,1,2,2);
 /*!40000 ALTER TABLE `discounts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:19

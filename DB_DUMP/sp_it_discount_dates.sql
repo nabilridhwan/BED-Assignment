@@ -27,7 +27,7 @@ CREATE TABLE `discount_dates` (
   `from` timestamp NOT NULL,
   `to` timestamp NOT NULL,
   PRIMARY KEY (`discount_date_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,7 +36,7 @@ CREATE TABLE `discount_dates` (
 
 LOCK TABLES `discount_dates` WRITE;
 /*!40000 ALTER TABLE `discount_dates` DISABLE KEYS */;
-INSERT INTO `discount_dates` VALUES (1,'2021-12-31 16:00:00','2022-01-30 16:00:00'),(2,'2021-10-30 16:00:00','2021-10-30 16:00:00'),(3,'2022-01-31 16:00:00','2022-02-27 16:00:00');
+INSERT INTO `discount_dates` VALUES (2,'2021-12-31 16:00:00','2022-01-30 16:00:00');
 /*!40000 ALTER TABLE `discount_dates` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 18:38:12
+-- Dump completed on 2021-12-30  0:24:20
