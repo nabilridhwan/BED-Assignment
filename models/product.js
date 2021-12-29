@@ -22,7 +22,7 @@ const Product = {
         categoryid = categoryid || null;
         brand = brand || null;
         price = price || null;
-        
+
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
@@ -103,11 +103,7 @@ const Product = {
                     if (err) {
                         callback(err, null);
                     } else {
-                        if(result.affectedRows == 0){
-                            return callback({errno: -1}, null)
-                        }else{
-                            return callback(err, result)
-                        }
+                        return callback(err, result)
                     }
 
                 })

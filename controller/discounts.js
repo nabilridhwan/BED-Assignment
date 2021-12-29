@@ -14,6 +14,7 @@ const DiscountDates = require('../models/discount_dates');
 
 // Discount endpoints
 router.get("/", (req, res) => {
+    // Get all discounts
     Discount.getAllDiscounts((err, data) => {
         if (err) {
             res.sendStatus(500);
@@ -25,6 +26,7 @@ router.get("/", (req, res) => {
 })
 
 router.get("/dates", (req, res) => {
+    // Get all discount dates
     DiscountDates.getAllDiscountDates((err, data) => {
         if (err) {
             res.sendStatus(500);
@@ -36,6 +38,7 @@ router.get("/dates", (req, res) => {
 })
 
 router.post("/dates", (req, res) => {
+    // Insert discount dates
     DiscountDates.insertDiscountDate({
         ...req.body
     }, (err, data) => {
@@ -43,6 +46,7 @@ router.post("/dates", (req, res) => {
             res.sendStatus(500);
         } else {
             res.status(201);
+            // Send back the discount_date_id
             res.json({
                 "discount_date_id": data.insertId
             });
@@ -51,6 +55,8 @@ router.post("/dates", (req, res) => {
 })
 
 router.get("/amount", (req, res) => {
+
+    // Get all discount amounts
     DiscountAmount.getAllDiscountAmount((err, data) => {
         if (err) {
             res.sendStatus(500);
@@ -62,6 +68,7 @@ router.get("/amount", (req, res) => {
 })
 
 router.post("/amount", (req, res) => {
+    // Insert discount amount
     DiscountAmount.insertDiscountAmount({
         ...req.body
     }, (err, data) => {
@@ -69,6 +76,7 @@ router.post("/amount", (req, res) => {
             res.sendStatus(500);
         } else {
             res.status(201);
+            // Send back the discount_amount_id
             res.json({
                 "discount_amount_id": data
             });
@@ -77,6 +85,7 @@ router.post("/amount", (req, res) => {
 })
 
 router.post("/", (req, res) => {
+    // Insert discount
     Discount.insertDiscount({
         ...req.body
     }, (err, data) => {
@@ -84,6 +93,7 @@ router.post("/", (req, res) => {
             console.log(err)
             res.sendStatus(500);
         } else {
+            // Send back the discount_id
             res.status(201).json({
                 discount_id: data.insertId
             })
@@ -92,11 +102,13 @@ router.post("/", (req, res) => {
 })
 
 router.delete("/:discount_id", (req, res) => {
+    // Delete discount
     Discount.deleteDiscount(req.params, (err, data) => {
         if (err) {
             console.log(err)
             res.sendStatus(500);
         } else {
+            // If the affected rows is 0, meaning that no discount is deleted (because it isn't found), send a 404 status code
             if(data.affectedRows == 0){
                 return res.sendStatus(404);
             }
@@ -106,12 +118,14 @@ router.delete("/:discount_id", (req, res) => {
 })
 
 router.get("/:productid", (req, res) => {
+    // Get discount by product id
     Discount.getDiscountForProduct({
         ...req.params
     }, (err, data) => {
         if (err) {
             return res.sendStatus(500)
         } else {
+            // If the data length is 0 (no product found), send a 404 status code
             if (data.length == 0) {
                 return res.sendStatus(404)
             }

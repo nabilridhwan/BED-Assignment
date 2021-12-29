@@ -8,8 +8,8 @@ _Note that endpoints or folders with an asterisk (*) means that they are optiona
 
 # Instructions
 1. Import Database Data from the `DB_DUMP` folder under the schema name `sp_it`.
-1. Run `npm install` on the root directory of this project to install the dependencies of the project.
-2. Create a `.env` with the following properties (for the sake of presentation and testing, these environment variables are already provided).
+2. Run `npm install` on the root directory of this project to install the dependencies of the project.
+3. Create a `.env` with the following properties (for the sake of presentation and testing, these environment variables are already provided).
 ```env
 HOST=<Your Host>
 PORT=<Your Port>
@@ -17,8 +17,8 @@ CLOUDINARY_API_KEY=<Your Cloudinary API Key>
 CLOUDINARY_API_SECRET=<Your Cloudinary Secret Key>
 CLOUDINARY_CLOUD_NAME=<Your Cloudinary Cloud Name>
 ```
-10. Run `node index.js` on the root folder of this project.
-11. Voila! Your app is running!
+4. Run `node index.js` on the root folder of this project.
+5. Voila! Your app is running!
 
 ## Advanced Features
 _Note that **images or pictures** here refer to either a jpg (or jpeg) and png files. All of them are limited to only 1MB_
