@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const express = require('express');
 const router = express.Router();
 
@@ -22,19 +29,16 @@ router.get("/dates", (req, res) => {
         if (err) {
             res.sendStatus(500);
         } else {
-            if (data) {
-                res.status(200);
-                res.send(data);
-            } else {
-                res.sendStatus(404);
-
-            }
+            res.status(200);
+            res.send(data);
         }
     })
 })
 
 router.post("/dates", (req, res) => {
-    DiscountDates.insertDiscountDate({...req.body},(err, data) => {
+    DiscountDates.insertDiscountDate({
+        ...req.body
+    }, (err, data) => {
         if (err) {
             res.sendStatus(500);
         } else {
@@ -47,7 +51,7 @@ router.post("/dates", (req, res) => {
 })
 
 router.get("/amount", (req, res) => {
-    DiscountAmount.getAllDiscountAmount((err,data) => {
+    DiscountAmount.getAllDiscountAmount((err, data) => {
         if (err) {
             res.sendStatus(500);
         } else {
@@ -58,7 +62,9 @@ router.get("/amount", (req, res) => {
 })
 
 router.post("/amount", (req, res) => {
-    DiscountAmount.insertDiscountAmount({...req.body}, (err, data) => {
+    DiscountAmount.insertDiscountAmount({
+        ...req.body
+    }, (err, data) => {
         if (err) {
             res.sendStatus(500);
         } else {
@@ -71,12 +77,16 @@ router.post("/amount", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-    Discount.insertDiscount({...req.body}, (err, data) => {
+    Discount.insertDiscount({
+        ...req.body
+    }, (err, data) => {
         if (err) {
             console.log(err)
             res.sendStatus(500);
         } else {
-            res.sendStatus(201);
+            res.status(201).json({
+                discount_id: data.insertId
+            })
         }
     })
 })
@@ -91,5 +101,22 @@ router.delete("/:discount_id", (req, res) => {
         }
     })
 })
+
+router.get("/:productid", (req, res) => {
+    Discount.getDiscountForProduct({
+        ...req.params
+    }, (err, data) => {
+        if (err) {
+            return res.sendStatus(500)
+        } else {
+            if (data.length == 0) {
+                return res.sendStatus(404)
+            }
+            return res.status(200).send(data)
+        }
+    })
+})
+
+
 
 module.exports = router;

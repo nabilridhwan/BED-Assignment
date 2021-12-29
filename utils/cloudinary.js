@@ -1,10 +1,31 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 
+// Environment Variables
+require("dotenv").config();
+
+// Get the environment variables
+const {
+    CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET,
+    CLOUDINARY_CLOUD_NAME
+} = process.env
+
+if(!CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET || !CLOUDINARY_CLOUD_NAME){
+    throw new Error("Cloudinary credentials not found! Have you included them in the .env file as per the instructions found in README.md")
+}
+
 cloudinary.config({
-    cloud_name: "dqxawxewb",
-    api_key: "534278375837782",
-    api_secret: "vpVQp-rWDoF5IC68oJCzAS8fDR8",
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
 })
 
 const uploadFileToCloudinary = (buffer, cloudinaryFolderName) => {

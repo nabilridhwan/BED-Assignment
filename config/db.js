@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const mysql = require('mysql');
 
 const dbconnect = {

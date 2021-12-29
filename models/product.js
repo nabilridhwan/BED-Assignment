@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const db = require('../config/db');
 
 const Product = {
@@ -42,7 +49,8 @@ const Product = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT * FROM products"
+                const sql = "SELECT p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid"
+
                 dbConn.query(sql, [], (err, result) => {
                     dbConn.end()
 
@@ -65,7 +73,7 @@ const Product = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
+                const sql = "SELECT p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
                 dbConn.query(sql, [id], (err, result) => {
                     dbConn.end()
 

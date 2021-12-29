@@ -1,6 +1,12 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const express = require('express');
 const app = express();
-const path = require('path');
 const cors = require('cors')
 const rateLimit = require("express-rate-limit");
 
@@ -11,19 +17,25 @@ const discountsRoute = require('./discounts.js');
 const interestRoute = require('./interests.js');
 const productsRoute = require('./products.js');
 
-
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: "Too much request from this IP, please try again later"
 });
 
+// General configurations for express applications
 app.use(express.json());
 app.use(express.urlencoded({
     extended: true
 }));
+
+// Use the rate limited
 app.use(limiter);
+
+// Use cors
 app.use(cors())
+
 
 app.use("/", usersRoute);
 app.use("/category", categoriesRoute);

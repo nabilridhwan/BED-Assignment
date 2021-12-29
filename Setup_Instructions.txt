@@ -1,0 +1,29 @@
+1. Open MySQL Workbench
+
+2. Click on Server > Data Import at the top of the window
+
+3. Click on the three dots at the most right hand side under "Import from Dump Project Folder"
+
+4. Navigate to the folder called EMPTY_DB OR DB_DUMP under the "config" folder (DB_DUMP contains records that are fake while EMPTY_DP contains no records, but only the structure of the tables)
+
+5. Under "Default Target Schema", Enter sp_it
+
+6. Under "Select Database Objects to Import" make sure to tick every possible table (might need to click on the schema name "sp_it")
+
+7. Click on "Start Import" button on the bottom right of the window
+
+8. Run npm install on the root directory of this project to install the dependencies of the project
+
+9. Create a .env with the following properties (for the sake of presentation and testing, these environment variables are already provided):
+
+HOST=<Your Host>
+PORT=<Your Port>
+CLOUDINARY_API_KEY=<Your Cloudinary API Key>
+CLOUDINARY_API_SECRET=<Your Cloudinary Secret Key>
+CLOUDINARY_CLOUD_NAME=<Your Cloudinary Cloud Name>
+
+9. Run node index.js on the root folder of this project.
+
+10. Voila! Your app is running!
+
+A better formatted version of this can be found on README.md!

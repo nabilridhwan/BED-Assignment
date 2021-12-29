@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const express = require('express');
 const router = express.Router();
 
@@ -18,7 +25,7 @@ const upload = multer({
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, true);
         } else {
-            cb(new Error("The file is not a jpeg, jpg or png file"));
+            cb(new Error("One or more files provided are not a jpeg, jpg or png file"));
         }
     }
 }).array('product_images', 5)
@@ -155,14 +162,20 @@ router.post("/:productId/image", (req, res) => {
         // Error handling for 
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
-            if (err.message == "Unexpected field") err.message = "product_images field not found or there is a maximum limit of 5 images per product"
+            if (err.message == "Unexpected field"){
+                err.message = "'product_images' field not found OR there is a maximum limit of 5 images per product"
+            }
+
+            if(err.message == "One or more files provided are not a jpeg, jpg or png file"){
+                return res.sendStatus(415)
+            }
             return res.status(500).send(err.message);
         } else {
 
             const files = req.files;
 
             // Check if there are files, otherwise return an error
-            if (!files) {
+            if (!files || files.length == 0) {
                 return res.status(400).send("There is/are no image(s) provided.")
             }
 

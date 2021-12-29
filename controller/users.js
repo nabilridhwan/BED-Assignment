@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const express = require('express');
 const router = express.Router();
 const Users = require('../models/users.js');
@@ -15,7 +22,7 @@ const upload = multer({
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, true);
         } else {
-            cb(new Error("The file is not a jpeg, jpg or png file"));
+            cb(new Error("The file provided is not a jpeg, jpg or png file"));
         }
     }
 }).single("profile_picture")
@@ -99,11 +106,7 @@ router.put("/users/:id", (req, res) => {
                     res.sendStatus(500);
                 }
             } else {
-                if (data.length > 0) {
-                    res.sendStatus(204);
-                } else {
-                    res.sendStatus(404);
-                }
+                res.sendStatus(204);
             }
         })
     }
@@ -113,13 +116,18 @@ router.put("/users/:id", (req, res) => {
 router.post("/users/:userid/image", (req, res) => {
 
     // Check if req.params.userid is a number
-    if(isNaN(req.params.userid)){
+    if (isNaN(req.params.userid)) {
         return res.status(400).send("The User ID provided must be a number")
     }
 
     upload(req, res, (err) => {
         if (err) {
             if (err.message == "File too large") err.message += ". The limit is 1MB";
+            if (err.message == "Unexpected field") err.message = "'profile_picture' field not found OR select only ONE image"
+
+            if(err.message == "The file provided is not a jpeg, jpg or png file"){
+                return res.sendStatus(415)
+            }
             return res.status(500).send(err.message);
         } else {
             // If there is no file, return with a status code of 400 indicating a bad request

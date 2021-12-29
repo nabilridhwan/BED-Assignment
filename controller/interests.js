@@ -1,3 +1,10 @@
+/*
+  Name: Nabil Ridhwanshah Bin Rosli
+  Class: DIT/FT/1B/05
+  Group: None (Solo)
+  Admin No: P2007421
+*/
+
 const express = require('express');
 const router = express.Router();
 
@@ -44,9 +51,12 @@ router.get("/:userid", (req, res) => {
         ...req.params
     }, (err, data) => {
         if (err) {
-            res.sendStatus(500);
+            return res.sendStatus(500);
         } else {
-            res.status(200).json(data);
+            if(data.length == 0){
+                return res.sendStatus(404);
+            }
+            return res.status(200).json(data);
         }
     })
 })
