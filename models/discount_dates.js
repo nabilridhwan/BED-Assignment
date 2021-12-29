@@ -47,7 +47,7 @@ const DiscountDates = {
                     if (err) {
                         callback(err);
                     } else {
-                        return callback(err, result.insertId)
+                        return callback(err, result)
                     }
 
                 })

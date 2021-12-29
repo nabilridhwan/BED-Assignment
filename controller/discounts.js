@@ -42,9 +42,9 @@ router.post("/dates", (req, res) => {
         if (err) {
             res.sendStatus(500);
         } else {
-            res.status(200);
+            res.status(201);
             res.json({
-                "insertid": data
+                "discount_date_id": data.insertId
             });
         }
     })
@@ -68,9 +68,9 @@ router.post("/amount", (req, res) => {
         if (err) {
             res.sendStatus(500);
         } else {
-            res.status(200);
+            res.status(201);
             res.json({
-                "insertid": data
+                "discount_amount_id": data
             });
         }
     })
@@ -97,6 +97,9 @@ router.delete("/:discount_id", (req, res) => {
             console.log(err)
             res.sendStatus(500);
         } else {
+            if(data.affectedRows == 0){
+                return res.sendStatus(404);
+            }
             res.sendStatus(204);
         }
     })

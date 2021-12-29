@@ -7,15 +7,9 @@ _Note that endpoints or folders with an asterisk (*) means that they are optiona
 <img src="./FINAL_ENDPOINTS.png" width=200>
 
 # Instructions
-1. Open MySQL Workbench
-2. Click on Server > Data Import at the top of the window
-3. Click on the three dots at the most right hand side under "Import from Dump Project Folder"
-4. Navigate to the folder called `EMPTY_DB` OR `DB_DUMP` under the "config" folder (`DB_DUMP` contains records that are fake while `EMPTY_DP` contains no records, but only the structure of the tables)
-3. Under "Default Target Schema", Enter sp_it
-6. Under "Select Database Objects to Import" make sure to tick every possible table (might need to click on the schema name "sp_it")
-6. Click on "Start Import" button on the bottom right of the window
-1. Run `npm install` on the root directory of this project to install the dependencies of the project
-2. Create a `.env` with the following properties (for the sake of presentation and testing, these environment variables are already provided)
+1. Import Database Data from the `DB_DUMP` folder under the schema name `sp_it`.
+1. Run `npm install` on the root directory of this project to install the dependencies of the project.
+2. Create a `.env` with the following properties (for the sake of presentation and testing, these environment variables are already provided).
 ```env
 HOST=<Your Host>
 PORT=<Your Port>
