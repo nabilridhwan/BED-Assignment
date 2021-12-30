@@ -144,7 +144,7 @@ router.post("/:id/review", (req, res) => {
 })
 
 // Endpoint 11: GET /product/:id/reviews
-router.get("/:id/reviews", (req, res) => {
+router.get("/:id/review", (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.id)) {
