@@ -161,7 +161,7 @@ router.post("/users/:userid/image", (req, res) => {
 
                 // Delete the image from cloudinary if public id is found
                 if (result.length > 0) {
-                    let public_id = results[0].public_id
+                    let public_id = result[0].public_id
                     try {
                         // There is a public id! Proceed to delete it!
                         let data = await Cloudinary.deleteFileFromCloudinary(public_id)
