@@ -30,6 +30,10 @@ const Category = {
     },
     
     insertCategory: ({category, description}, callback) => {
+
+        category = category || null;
+        description = description || null;
+        
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
             if (err) {
