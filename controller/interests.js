@@ -57,10 +57,6 @@ router.get("/:userid", (req, res) => {
         if (err) {
             return res.sendStatus(500);
         } else {
-            // If there is no data, send a 404 status code
-            if(data.length == 0){
-                return res.sendStatus(404);
-            }
             return res.status(200).json(data);
         }
     })

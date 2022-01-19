@@ -159,12 +159,7 @@ router.get("/:id/review", (req, res) => {
             console.log(err)
             res.sendStatus(500);
         } else {
-            // If there is no data, send a 404 status code
-            if (data.length > 0) {
-                return res.status(200).json(data);
-            } else {
-                return res.sendStatus(404);
-            }
+            return res.sendStatus(404);
         }
     })
 })
@@ -294,7 +289,7 @@ router.get("/:productId/image", (req, res) => {
     if (isNaN(req.params.productId)) {
         return res.status(400).send("The Product ID provided must be a number")
     }
-   
+
     // Get all the images by product id
     ProductImages.getImageByProductId({
         ...req.params
@@ -307,7 +302,7 @@ router.get("/:productId/image", (req, res) => {
                 res.status(200)
                 res.json(data.map(data => data.url))
             } else {
-                res.sendStatus(404);
+                res.status(200).json([])
             }
         }
     })
