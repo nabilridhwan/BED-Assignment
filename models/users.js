@@ -150,6 +150,30 @@ const userDB = {
                 })
             }
         })
+    },
+
+    verify: ({email, password}) => {
+        email = email || null;
+        password = password || null;
+
+        return new Promise((resolve, reject) => {
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    const sql = "SELECT userid, type FROM users WHERE email = ? AND password = ?" 
+                    dbConn.query(sql, [email, password], (err, result) => {
+                        dbConn.end()
+                        if (err) {
+                            reject(err)
+                        } else {
+                            resolve(result)
+                        }
+                    })
+                }
+            })
+        })
     }
 }
 

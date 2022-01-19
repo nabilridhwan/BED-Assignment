@@ -159,7 +159,7 @@ router.get("/:id/review", (req, res) => {
             console.log(err)
             res.sendStatus(500);
         } else {
-            return res.sendStatus(404);
+            return res.status(200).json(data);
         }
     })
 })
@@ -302,7 +302,8 @@ router.get("/:productId/image", (req, res) => {
                 res.status(200)
                 res.json(data.map(data => data.url))
             } else {
-                res.status(200).json([])
+                // Sends back empty data
+                return res.status(200).json([])
             }
         }
     })

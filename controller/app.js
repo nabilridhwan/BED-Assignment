@@ -16,6 +16,7 @@ const categoriesRoute = require('./categories.js');
 const discountsRoute = require('./discounts.js');
 const interestRoute = require('./interests.js');
 const productsRoute = require('./products.js');
+const authRoute = require("./auth.js");
 
 // Rate limiting
 const limiter = rateLimit({
@@ -42,5 +43,6 @@ app.use("/category", categoriesRoute);
 app.use("/discount", discountsRoute);
 app.use("/interest", interestRoute);
 app.use("/product", productsRoute);
+app.use("/auth", authRoute);
 
 module.exports = app;

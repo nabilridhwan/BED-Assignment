@@ -14,6 +14,7 @@ const ProfilePictureImages = require('../models/ProfilePictureImages.js');
 
 // Require cloudinary
 const Cloudinary = require('../utils/cloudinary.js');
+const isUserLoggedIn = require('../auth/isUserLoggedIn.js');
 
 // profile_picture field only accepts 1 image with limit of 1MB
 const upload = multer({
@@ -67,10 +68,16 @@ router.get("/users", (req, res) => {
 })
 
 // Endpoint 3: GET /users/:id
-router.get("/users/:id", (req, res) => {
+router.get("/users/:id", isUserLoggedIn, (req, res) => {
     const {
         id
     } = req.params;
+
+    console.log(req.userid);
+
+    if(req.userid != id){
+        return res.sendStatus(403);
+    }
 
     // check if the id is a number
     if (isNaN(id)) {
@@ -97,10 +104,16 @@ router.get("/users/:id", (req, res) => {
 
 
 // Endpoint 4: PUT /users/:id
-router.put("/users/:id", (req, res) => {
+router.put("/users/:id", isUserLoggedIn, (req, res) => {
+
     const {
         id
     } = req.params;
+
+    if(id != req.userid){
+        console.log("ID Mismatch")
+        return res.sendStatus(403);
+    }
 
     // check if the id is a number
     if (isNaN(id)) {

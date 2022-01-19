@@ -6,12 +6,19 @@
 */
 
 const express = require('express');
+const isUserLoggedIn = require('../auth/isUserLoggedIn');
 const router = express.Router();
 
 const Category = require("../models/category");
 
 // Endpoint 5: POST /category
-router.post("/", (req, res) => {
+router.post("/", isUserLoggedIn, (req, res) => {
+
+    if(req.type !== "Admin"){
+        res.status(403).json({
+            message: "You are not authorized to perform this action"
+        })
+    }
     // Insert the category
     Category.insertCategory(req.body, (err, data) => {
         if (err) {
