@@ -8,50 +8,60 @@
 const db = require('../config/db');
 
 const Category = {
-    getAllCategories: (callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT * FROM category"
-                dbConn.query(sql, [], (err, result) => {
-                    dbConn.end()
-                    
-                    if (err) {
-                        callback(err);
-                    }else{
-                        return callback(err, result)
-                    }
+    getAllCategories: () => {
 
-                })
-            }
+        return new Promise((resolve, reject) => {
+
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err)
+                } else {
+                    const sql = "SELECT * FROM category"
+                    dbConn.query(sql, [], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
         })
     },
-    
-    insertCategory: ({category, description}, callback) => {
+
+    insertCategory: ({
+        category,
+        description
+    }) => {
 
         category = category || null;
         description = description || null;
-        
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "INSERT INTO category(category, description) VALUES(?,?)"
-                dbConn.query(sql, [category, description], (err, result) => {
-                    dbConn.end()
 
-                    
-                    if (err) {
-                        callback(err);
-                    }else{
-                        return callback(err, result)
-                    }
+        return new Promise((resolve, reject) => {
 
-                })
-            }
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "INSERT INTO category(category, description) VALUES(?,?)"
+                    dbConn.query(sql, [category, description], (err, result) => {
+                        dbConn.end()
+
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
         })
     },
 

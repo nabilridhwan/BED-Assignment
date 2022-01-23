@@ -8,7 +8,6 @@
 const express = require('express');
 const app = express();
 const cors = require('cors')
-const rateLimit = require("express-rate-limit");
 
 // Routes
 const usersRoute = require('./users.js');
@@ -19,11 +18,11 @@ const productsRoute = require('./products.js');
 const authRoute = require("./auth.js");
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too much request from this IP, please try again later"
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   message: "Too much request from this IP, please try again later"
+// });
 
 // General configurations for express applications
 app.use(express.json());
@@ -32,7 +31,7 @@ app.use(express.urlencoded({
 }));
 
 // Use the rate limited
-app.use(limiter);
+// app.use(limiter);
 
 // Use cors
 app.use(cors())

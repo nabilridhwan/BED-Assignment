@@ -33,130 +33,124 @@ const upload = multer({
 }).single("profile_picture")
 
 // Endpoint 1: POST users 
-router.post("/users", (req, res) => {
-    // Insert the user
-    Users.insertUser(req.body, (err, data) => {
-        if (err) {
+router.post("/users", async (req, res) => {
+    try {
+        // Insert the user
+        const insert = await Users.insertUser(req.body);
+        return res.status(201).json({
+            userid: insert.insertId
+        })
 
-            console.log(err)
-            const errorNumber = err.errno;
-            // If the user exists (duplicated username or email), send a 422 status code
-            if (errorNumber === 1062) {
-                res.status(422).send("The email or username provided already exists");
-            } else {
-                res.sendStatus(500);
-            }
-        } else {
-            // Send back the userid
-            res.status(201).json({
-                userid: data.insertId
-            });
+    } catch (err) {
+        if (err.errno == 1062) {
+            return res.status(422).send("The email or username provided already exists");
         }
-    })
+
+        return res.status(500).send(err)
+    }
 })
 
 // Endpoint 2: GET /users
-router.get("/users", (req, res) => {
-    // Get all users
-    Users.getAllUsers((err, users) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            res.status(200).json(users);
-        }
-    })
+router.get("/users", async (req, res) => {
+    try {
+        // Get all users
+        const users = await Users.getAllUsers();
+        return res.status(200).json(users);
+    } catch (err) {
+        return res.status(500).send(err)
+    }
 })
 
 // Endpoint 3: GET /users/:id
-router.get("/users/:id", isUserLoggedIn, (req, res) => {
-    const {
-        id
-    } = req.params;
+router.get("/users/:id", isUserLoggedIn, async (req, res) => {
 
-    console.log(req.userid);
-
-    if(req.userid != id){
+    if (req.userid != req.params.id) {
         return res.sendStatus(403);
     }
 
     // check if the id is a number
-    if (isNaN(id)) {
+    if (isNaN(req.params.id)) {
         return res.status(400).send("The User ID provided must be a number")
     }
 
     // Get user by ID
-    Users.getUser({
-        id
-    }, (err, users) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            // If there is no data, send a 404 status code
-            if (users.length == 0) {
-                res.sendStatus(404);
-            } else {
-                res.status(200).json(users);
-            }
-        }
-    })
+    try {
+        const users = await Users.getUser({
+            id: req.params.id
+        })
+        return res.json(users);
+    } catch (e) {
+        console.log(e)
+        return res.status(500).send(e);
+    }
 
 })
 
 
 // Endpoint 4: PUT /users/:id
-router.put("/users/:id", isUserLoggedIn, (req, res) => {
+router.put("/users/:id", isUserLoggedIn, async (req, res) => {
 
-    const {
-        id
-    } = req.params;
-
-    if(id != req.userid){
-        console.log("ID Mismatch")
+    if (req.params.id != req.userid) {
         return res.sendStatus(403);
     }
 
     // check if the id is a number
-    if (isNaN(id)) {
-        res.status(400).send("The User ID provided must be a number")
-    } else {
+    if (isNaN(req.params.id)) {
+        return res.status(400).send("The User ID provided must be a number")
+    }
+
+    try {
         // Update the user
-        Users.updateUser({
-            id,
+        await Users.updateUser({
+            id: req.params.id,
             ...req.body
-        }, (err, data) => {
-            if (err) {
-                console.log(err)
-                // If the username or email is duplicated, send a 422 status code
-                if (err.errno === 1062) {
-                    res.status(422).send("The new username OR new email provided already exists.")
-                } else {
-                    res.sendStatus(500);
-                }
-            } else {
-                res.sendStatus(204);
-            }
         })
+
+        return res.sendStatus(204);
+
+    } catch (e) {
+        console.log(e)
+        if (e.errno == 1062) return res.status(422).send("The new username OR new email provided already exists.")
+        if (e.errno == 1048) return res.sendStatus(400);
+
+        return res.status(500).send(e);
     }
 })
 
 // User profile image url
-router.post("/users/:userid/image", (req, res) => {
+router.post("/users/:userid/image", isUserLoggedIn, async (req, res) => {
 
     // Check if req.params.userid is a number
     if (isNaN(req.params.userid)) {
         return res.status(400).send("The User ID provided must be a number")
     }
 
-    upload(req, res, (err) => {
+    // if (req.params.userid != req.userid) {
+    //     return res.sendStatus(403);
+    // }
+
+    try {
+        const users = await Users.getUser({
+            id: req.params.userid
+        })
+        if (users.length == 0) return res.sendStatus(404);
+
+    } catch (e) {
+        return res.status(500).send(e);
+    }
+    upload(req, res, async (err) => {
 
         // Error checking!
         if (err) {
-            if (err.message == "File too large") err.message += ". The limit is 1MB";
+            if (err.message == "File too large") {
+                return res.sendStatus(413);
+            }
             if (err.message == "Unexpected field") err.message = "'profile_picture' field not found OR select only ONE image"
 
             if (err.message == "The file provided is not a jpeg, jpg or png file") {
                 return res.sendStatus(415)
             }
+            console.log(err)
             return res.status(500).send(err.message);
         } else {
             // If there is no file, return with a status code of 400 indicating a bad request
@@ -165,96 +159,74 @@ router.post("/users/:userid/image", (req, res) => {
             }
 
             // Get public id of the user's profile picture
-            ProfilePictureImages.getPublicId({
-                userid: req.params.userid
-            }, async (err, result) => {
-                if (err) {
-                    return res.sendStatus(500);
-                }
+
+            try {
+                const publicIds = ProfilePictureImages.getPublicId({
+                    userid: req.params.userid
+                })
 
                 // Delete the image from cloudinary if public id is found
-                if (result.length > 0) {
-                    let public_id = result[0].public_id
+                if (publicIds.length > 0) {
+                    let public_id = publicIds[0].public_id
                     try {
                         // There is a public id! Proceed to delete it!
-                        let data = await Cloudinary.deleteFileFromCloudinary(public_id)
-                        // Deleted successfully
-                        if (data.result == "ok") {
-                            console.log("Deleted profile picture from cloudinary successfully")
-                        } else {
-                            console.log("No profile picture found in cloudinary... Adding one!")
-                        }
+                        await Cloudinary.deleteFileFromCloudinary(public_id)
                     } catch (error) {
+                        console.log(error)
                         return res.status(500).send(error);
                     }
                 }
+            } catch (e) {
+                return res.status(500).send(e);
+            }
+
+            try {
+                // Upload the image to cloudinary
+                let data = await Cloudinary.uploadFileToCloudinary(req.file.buffer, "profile_pictures");
+
+                // Get the public id and url of the image
+                const {
+                    public_id,
+                    secure_url
+                } = data;
+
+                // Delete all the images from the database
+                await ProfilePictureImages.deleteAllProfilePictures({
+                    ...req.params
+                })
 
                 try {
-                    // Check if the user exist before uploading (this save resources!)
-                    Users.getUser({
-                        id: req.params.userid
-                    }, async (err, result) => {
-                        if (err) {
-                            return res.sendStatus(500);
-                        }
 
-                        // If user is not found, return with a status code of 404
-                        if (result.length == 0) {
-                            return res.sendStatus(404);
-                        }
+                    // Insert into database
+                    await ProfilePictureImages.insertProfilePicture({
+                        ...req.params,
+                        url: secure_url,
+                        public_id
+                    });
 
-                        // Upload the image to cloudinary
-                        let data = await Cloudinary.uploadFileToCloudinary(req.file.buffer, "profile_pictures");
+                    console.log("Nice! Inserted profile picture into database successfully")
 
-                        // Get the public id and url of the image
-                        const {
-                            public_id,
-                            secure_url
-                        } = data;
-
-                        // Delete all the images from the database
-                        ProfilePictureImages.deleteAllProfilePictures({
-                            ...req.params
-                        }, (err, data) => {
-                            if (err) {
-                                return res.sendStatus(500);
-                            } else {
-                                // Insert into database
-                                ProfilePictureImages.insertProfilePicture({
-                                    ...req.params,
-                                    url: secure_url,
-                                    public_id
-                                }, (err, data) => {
-                                    if (err) {
-                                        return res.status(500).send(err);
-                                    } else {
-                                        console.log("Nice! Inserted profile picture into database successfully")
-
-                                        // Finally, update the user's profile picture url
-                                        Users.updateProfilePictureUrl({
-                                            ...req.params,
-                                            profile_pic_url: secure_url
-                                        }, (err, data) => {
-                                            if (err) {
-                                                return res.sendStatus(500)
-                                            } else {
-                                                console.log("Successfully updated profile picture url in database")
-                                                return res.sendStatus(204)
-                                            }
-                                        })
-
-                                    }
-                                })
-
-                            }
+                    try { // Finally, update the user's profile picture url in the users table
+                        await Users.updateProfilePictureUrl({
+                            ...req.params,
+                            profile_pic_url: secure_url
                         })
 
-                    })
-                } catch (error) {
-                    return res.status(500).send(error);
-
+                        console.log("Successfully updated profile picture url in database")
+                        return res.sendStatus(204);
+                    } catch (e) {
+                        console.log(e)
+                        return res.status(500).send(e)
+                    }
+                } catch (e) {
+                    console.log(e)
+                    return res.status(500).send(e);
                 }
-            })
+            } catch (error) {
+                console.log(error)
+                return res.status(500).send(error);
+
+            }
         }
     })
 

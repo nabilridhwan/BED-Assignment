@@ -21,11 +21,12 @@ function isUserLoggedIn(req, res, next) {
 
             req.userid = decoded.userid;
             req.type = decoded.type
+
+            return next();
         })
+
     }
 
-
-    next();
 }
 
 module.exports = isUserLoggedIn;

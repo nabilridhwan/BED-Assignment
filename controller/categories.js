@@ -12,40 +12,42 @@ const router = express.Router();
 const Category = require("../models/category");
 
 // Endpoint 5: POST /category
-router.post("/", isUserLoggedIn, (req, res) => {
+router.post("/", isUserLoggedIn, async (req, res) => {
 
-    if(req.type !== "Admin"){
-        res.status(403).json({
+    if (req.type !== "Admin") {
+        return res.status(403).json({
             message: "You are not authorized to perform this action"
         })
     }
-    // Insert the category
-    Category.insertCategory(req.body, (err, data) => {
-        if (err) {
-            // If there is an error, send a 500 status code
-            // If it is duplicated, send a status code 422
-            if (err.errno == 1062) {
-                res.status(422).send("The new category name provided already exists")
-            } else {
-                res.sendStatus(500);
-            }
 
-        } else {
-            res.sendStatus(204);
+    try {
+
+        // Insert the category
+        await Category.insertCategory(req.body)
+
+        return res.sendStatus(204);
+    } catch (error) {
+        console.log(error)
+        if (error.errno == 1062) {
+            return res.status(422).send("The new category name provided already exists")
         }
-    })
+
+        return res.status(500).send(error)
+    }
 })
 
 // Endpoint 6: GET /category
-router.get("/", (req, res) => {
-    // Get all categories
-    Category.getAllCategories((err, categories) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            res.status(200).json(categories);
-        }
-    })
+router.get("/", async (req, res) => {
+
+    try {
+        // Get all categories
+        const categories = await Category.getAllCategories()
+        return res.json(categories);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(error)
+    }
+
 })
 
 module.exports = router;

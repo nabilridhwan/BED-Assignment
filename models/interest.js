@@ -9,94 +9,127 @@ const db = require('../config/db');
 
 const Interest = {
 
-    getAllInterests: (callback) => {
-        var dbConn = db.getConnection();
+    getAllInterests: () => {
 
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid"
-                dbConn.query(sql, [], (err, result) => {
-                    dbConn.end();
-                    if (err) {
-                        return callback(err);
-                    } else {
-                        return callback(null, result);
-                    }
-                })
-            }
+        return new Promise((resolve, reject) => {
+
+            var dbConn = db.getConnection();
+
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid"
+                    dbConn.query(sql, [], (err, result) => {
+                        dbConn.end();
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                }
+            })
         })
     },
 
     getInterestsById: ({
         userid
     }, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
-                dbConn.query(sql, [userid], (err, result) => {
 
-                    dbConn.end();
-                    if (err) {
-                        return callback(err);
-                    } else {
-                        return callback(null, result);
-                    }
-                })
-            }
+        return new Promise((resolve, reject) => {
+
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
+                    dbConn.query(sql, [userid], (err, result) => {
+
+                        dbConn.end();
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                }
+            })
         })
     },
 
     insertInterests: ({
         userid,
         categoryids
-    }, callback) => {
+    }) => {
         userid = userid || null;
         categoryids = categoryids != null && categoryids.length > 0 ? categoryids.replace(/\s/g, '').split(',') : null;
 
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                if (categoryids != null) {
+        return new Promise((resolve, reject) => {
 
 
-                    const sql = "INSERT INTO interest(userid, categoryid) VALUES(?,?)"
-                    let categoryPromises = categoryids.map(categoryId => {
-                        return new Promise((resolve, reject) => {
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (categoryids != null) {
+                        const sql = "INSERT INTO interest(userid, categoryid) VALUES(?,?)"
 
-                            dbConn.query(sql, [userid, categoryId], (err, result) => {
+                        let categoryPromises = categoryids.map(categoryId => {
+                            return new Promise((resolve, reject) => {
+                                dbConn.query(sql, [userid, categoryId], (err, result) => {
 
-                                if (err) {
-                                    reject(err)
-                                } else {
-                                    resolve(result)
-                                }
+                                    if (err) {
+                                        reject(err)
+                                    } else {
+                                        resolve(result)
+                                    }
+                                })
                             })
                         })
-                    })
 
-                    Promise.all(categoryPromises)
-                        .then(data => {
-                            return callback(null, data);
-                        }).catch(e => {
-                            console.log("Error", e)
-                            return callback(e, null)
-                        }).finally(() => {
-                            dbConn.end()
-                        })
+                        Promise.all(categoryPromises)
+                            .then(data => {
+                                resolve(data);
+                            }).catch(e => {
+                                console.log("Error", e)
+                                reject(e)
+                            }).finally(() => {
+                                dbConn.end()
+                            })
 
-                } else {
-                    callback(true, null);
+                    } else {
+                        reject("No category ids provided")
+                    }
                 }
-            }
+            })
         })
     },
+
+    clearInterestByUserId(userid) {
+        userid = userid || null;
+
+        return new Promise((resolve, reject) => {
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "DELETE FROM interest WHERE userid = ?"
+                    dbConn.query(sql, [userid], (err, result) => {
+                        dbConn.end();
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                }
+            })
+        })
+    }
 
 }
 

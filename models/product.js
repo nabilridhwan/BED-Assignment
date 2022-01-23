@@ -15,7 +15,7 @@ const Product = {
         categoryid,
         brand,
         price
-    }, callback) => {
+    }) => {
 
         name = name || null;
         description = description || null;
@@ -23,114 +23,157 @@ const Product = {
         brand = brand || null;
         price = price || null;
 
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "INSERT INTO products(name, description, categoryid, brand, price) VALUES(?, ?, ?, ?, ?)"
-                dbConn.query(sql, [name, description, categoryid, brand, price], (err, result) => {
-                    dbConn.end()
+        return new Promise((resolve, reject) => {
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "INSERT INTO products(name, description, categoryid, brand, price) VALUES(?, ?, ?, ?, ?)"
+                    dbConn.query(sql, [name, description, categoryid, brand, price], (err, result) => {
+                        dbConn.end()
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
 
-                })
-            }
+                    })
+                }
+            })
         })
     },
 
-    getAllProducts: (callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid"
+    getAllProducts: () => {
 
-                dbConn.query(sql, [], (err, result) => {
-                    dbConn.end()
+        return new Promise((resolve, reject) => {
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
+            var dbConn = db.getConnection()
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid"
 
-                })
-            }
+                    dbConn.query(sql, [], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
         })
     },
 
     getProduct: ({
         id
-    }, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
-                dbConn.query(sql, [id], (err, result) => {
-                    dbConn.end()
+    }) => {
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
+        return new Promise((resolve, reject) => {
 
-                })
-            }
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.productid = ?;"
+                    dbConn.query(sql, [id], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+
+                    })
+                }
+            })
+
+
         })
     },
 
     deleteProduct: ({
         id
-    }, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "DELETE FROM products WHERE productid = ?"
-                dbConn.query(sql, [id], (err, result) => {
-                    dbConn.end()
-
-                    if (err) {
-                        callback(err, null);
-                    } else {
-                        return callback(err, result)
-                    }
-
-                })
-            }
+    }) => {
+        id = id || null;
+        return new Promise((resolve, reject) => {
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "DELETE FROM products WHERE productid = ?"
+                    dbConn.query(sql, [id], (err, result) => {
+                        dbConn.end()
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                }
+            })
         })
     },
 
     getReviewsForProduct: ({
         id
-    }, callback) => {
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT p.productid, u.userid, u.username, r.rating, r.review, r.created_at FROM products p, reviews r, users u WHERE p.productid = r.productid AND r.userid = u.userid AND r.productid = ?;"
-                dbConn.query(sql, [id], (err, result) => {
-                    dbConn.end()
+    }) => {
+        return new Promise((resolve, reject) => {
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err)
+                } else {
+                    const sql = "SELECT p.productid, u.userid, u.username, r.rating, r.review, r.created_at FROM products p, reviews r, users u WHERE p.productid = r.productid AND r.userid = u.userid AND r.productid = ?;"
+                    dbConn.query(sql, [id], (err, result) => {
+                        dbConn.end()
 
-                })
-            }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
+        })
+    },
+
+    find(searchQuery, columnName) {
+        searchQuery = searchQuery || null;
+        return new Promise((resolve, reject) => {
+
+            if (!searchQuery) reject("Search query is empty")
+
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = 'SELECT * FROM products WHERE ' + columnName +' LIKE "%' +searchQuery+ '%"'
+                    dbConn.query(sql, [columnName], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+
+                    })
+                }
+            })
         })
     }
 

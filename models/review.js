@@ -14,30 +14,34 @@ const Reviews = {
         userid,
         rating,
         review,
-    }, callback) => {
+    }) => {
 
         productid = productid || null;
         userid = userid || null;
         rating = rating || null;
         review = review || null;
 
-        var dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "INSERT INTO reviews(productid, userid, rating, review) VALUES(?,?,?,?)"
-                dbConn.query(sql, [productid, userid, rating, review], (err, result) => {
-                    dbConn.end()
+        return new Promise((resolve, reject) => {
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "INSERT INTO reviews(productid, userid, rating, review) VALUES(?,?,?,?)"
+                    dbConn.query(sql, [productid, userid, rating, review], (err, result) => {
+                        dbConn.end()
 
-                })
-            }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
+
         })
     },
 

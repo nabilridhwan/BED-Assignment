@@ -8,47 +8,55 @@
 const db = require('../config/db');
 
 const userDB = {
-    getAllUsers: (callback) => {
-        const dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT userid, username, email, contact, type, profile_pic_url, created_at FROM users"
-                dbConn.query(sql, [], (err, result) => {
+    getAllUsers: () => {
 
-                    dbConn.end()
+        return new Promise((resolve, reject) => {
 
-                    if (err) {
-                        return callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-                })
-            }
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT userid, username, email, contact, type, profile_pic_url, created_at FROM users"
+                    dbConn.query(sql, [], (err, result) => {
+
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+                    })
+                }
+            })
         })
     },
 
     getUser: ({
         id
-    }, callback) => {
-        const dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "SELECT userid, username, email, contact, type, profile_pic_url, created_at FROM users WHERE userid = ?"
-                dbConn.query(sql, [id], (err, result) => {
+    }) => {
 
-                    dbConn.end()
+        return new Promise((resolve, reject) => {
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-                })
-            }
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "SELECT * FROM users WHERE userid = ?"
+                    dbConn.query(sql, [id], (err, result) => {
+
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+                    })
+                }
+            })
         })
     },
 
@@ -60,7 +68,7 @@ const userDB = {
         profile_pic_url,
         username,
         password
-    }, callback) {
+    }) {
 
         email = email || null;
         contact = contact || null;
@@ -69,23 +77,25 @@ const userDB = {
         username = username || null;
         password = password || null;
 
-        const dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "INSERT INTO users(email, contact, password, type, profile_pic_url, username) VALUES(?,?,?,?,?,?)"
-                dbConn.query(sql, [email, contact, password, type, profile_pic_url, username], (err, result) => {
+        return new Promise((resolve, reject) => {
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "INSERT INTO users(email, contact, password, type, profile_pic_url, username) VALUES(?,?,?,?,?,?)"
+                    dbConn.query(sql, [email, contact, password, type, profile_pic_url, username], (err, result) => {
 
-                    dbConn.end()
+                        dbConn.end()
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-                })
-            }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                }
+            })
         })
     },
 
@@ -94,65 +104,70 @@ const userDB = {
         email,
         contact,
         type,
-        profile_pic_url,
         username,
         password
-    }, callback) {
+    }) {
 
         email = email || null;
         contact = contact || null;
         type = type || null;
-        profile_pic_url = profile_pic_url || null;
         username = username || null;
         id = id || null;
         password = password || null;
 
-        const dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "UPDATE users SET password = ?, email = ?, contact = ?, type = ?, profile_pic_url = ?, username = ? WHERE userid = ?"
-                dbConn.query(sql, [password, email, contact, type, profile_pic_url, username, id], (err, result) => {
+        return new Promise((resolve, reject) => {
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "UPDATE users SET password = ?, email = ?, contact = ?, type = ?, username = ? WHERE userid = ?"
+                    dbConn.query(sql, [password, email, contact, type, username, id], (err, result) => {
 
-                    dbConn.end()
+                        dbConn.end()
 
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-                })
-            }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+                    })
+                }
+            })
         })
     },
 
     updateProfilePictureUrl: ({
         profile_pic_url,
         userid
-    }, callback) => {
+    }) => {
         userid = userid || null;
         profile_pic_url = profile_pic_url || null;
 
-        const dbConn = db.getConnection();
-        dbConn.connect(function (err) {
-            if (err) {
-                callback(err, null);
-            } else {
-                const sql = "UPDATE users SET profile_pic_url = ? where userid = ?"
-                dbConn.query(sql, [profile_pic_url, userid], (err, result) => {
-                    dbConn.end()
-                    if (err) {
-                        callback(err);
-                    } else {
-                        return callback(err, result)
-                    }
-                })
-            }
+        return new Promise((resolve, reject) => {
+            const dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "UPDATE users SET profile_pic_url = ? where userid = ?"
+                    dbConn.query(sql, [profile_pic_url, userid], (err, result) => {
+                        dbConn.end()
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+                    })
+                }
+            })
         })
     },
 
-    verify: ({email, password}) => {
+    verify: ({
+        email,
+        password
+    }) => {
         email = email || null;
         password = password || null;
 
@@ -162,7 +177,7 @@ const userDB = {
                 if (err) {
                     callback(err, null);
                 } else {
-                    const sql = "SELECT userid, type FROM users WHERE email = ? AND password = ?" 
+                    const sql = "SELECT userid, type FROM users WHERE email = ? AND password = ?"
                     dbConn.query(sql, [email, password], (err, result) => {
                         dbConn.end()
                         if (err) {

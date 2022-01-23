@@ -17,6 +17,7 @@ const ProductImages = require('../models/ProductImages');
 
 // Require cloudinary
 const Cloudinary = require('../utils/cloudinary');
+const isUserLoggedIn = require('../auth/isUserLoggedIn');
 
 // Storage uses memoryStorage
 // Limits of fileSize 1MB
@@ -39,39 +40,63 @@ const upload = multer({
 }).array('product_images', 5)
 
 // Get all products
-router.get("/", (req, res) => {
-    // Get all products
-    Product.getAllProducts((err, data) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            res.status(200).json(data);
+router.get("/", async (req, res) => {
+
+    if (req.query.name) {
+        try {
+            // Search by name
+            const products = await Product.find(req.query.name, "name")
+            return res.status(200).json(products)
+        } catch (err) {
+            console.log(err)
+            return res.status(500).send(err)
         }
-    })
+    }
+
+    if (req.query.brand) {
+        try {
+            // Search by name
+            const products = await Product.find(req.query.brand, "brand")
+            return res.status(200).json(products)
+        } catch (err) {
+            console.log(err)
+            return res.status(500).send(err)
+        }
+    }
+
+    try {
+        // Get all products
+        let products = await Product.getAllProducts();
+        return res.status(200).json(products);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json(error);
+    }
+
 })
 
 // Endpoint 7: POST /product
-router.post("/", (req, res) => {
-    // Insert the product
-    Product.insertProduct(req.body, (err, data) => {
-        if (err) {
-            // If there is duplicated, send a status code 422
-            if (err.errno == 1062) {
-                return res.status(422).send("The product name provided already exists");
-            }
-            return res.sendStatus(500);
+router.post("/", async (req, res) => {
 
-        } else {
-            // Send back the product_id
-            res.status(201).json({
-                "productid": data.insertId
-            })
+    try {
+        // Insert the product
+        let insert = await Product.insertProduct(req.body);
+
+        return res.status(201).json({
+            "productid": insert.insertId
+        })
+    } catch (err) {
+        console.log(err)
+        if (err.errno == 1062) {
+            return res.status(422).send("The product name provided already exists");
         }
-    })
+        return res.status(500).send(err);
+    }
+
 })
 
 // Endpoint 8: GET /product/:id
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.id)) {
@@ -79,103 +104,120 @@ router.get("/:id", (req, res) => {
     }
 
     // Get product by ID
-    Product.getProduct({
-        id: req.params.id
-    }, (err, product) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            res.status(200).json(product);
-        }
-    })
+    try {
+        let product = await Product.getProduct({
+            id: req.params.id
+        });
+        return res.status(200).json(product);
+    } catch (e) {
+        console.log(e)
+        return res.status(500).send(e);
+    }
+
 })
 // Endpoint 9: DELETE /product/:id
-router.delete("/:id", (req, res) => {
+router.delete("/:id", isUserLoggedIn, async (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.id)) {
         return res.status(400).send("The Product ID provided must be a number")
     }
 
+    if (req.role !== "Admin") {
+        return res.sendStatus(403);
+    }
 
-    // Delete product by ID
-    Product.deleteProduct({
-        id: req.params.id
-    }, (err, product) => {
-        if (err) {
-            res.sendStatus(500);
-        } else {
-            // If there is no data, send a 404 status code
-            if (product.affectedRows == 0) {
-                return res.sendStatus(404);
-            }
-            res.sendStatus(204);
-        }
-    })
+
+    try {
+        await Product.deleteProduct({
+            id: req.params.id
+        });
+        return res.sendStatus(200);
+    } catch (e) {
+        console.log(e)
+        return res.status(500).send(e);
+    }
 })
 
 // Endpoint 10: POST /product/:id/review/
-router.post("/:id/review", (req, res) => {
+router.post("/:id/review", isUserLoggedIn, async (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.id)) {
         return res.status(400).send("The Product ID provided must be a number")
+    }
+
+    // If user is not signed in, return a 403
+    if (!req.token) {
+        return res.sendStatus(403);
     }
 
     // Insert the review
-    Reviews.insertReview({
-        productid: req.params.id,
-        ...req.body
-    }, (err, data) => {
-        if (err) {
-            // If there is a foreign key constraint (meaning one of the data is not found), send a 404 status code
-            if (err.errno == 1452) {
-                res.sendStatus(404);
-            } else {
-                res.sendStatus(500);
-            }
-        } else {
-            // Send back the review_id
-            res.status(200).json({
-                "reviewid": data.insertId
-            })
-        }
-    })
+    try {
+
+        let result = await Reviews.insertReview({
+            productid: req.params.id,
+            ...req.body,
+            userid: req.userid
+        })
+
+        return res.json({
+            reviewid: result.insertId
+        })
+
+    } catch (e) {
+        console.log(e)
+        return res.status(500).send(e)
+    }
 })
 
 // Endpoint 11: GET /product/:id/reviews
-router.get("/:id/review", (req, res) => {
+router.get("/:id/review", async (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.id)) {
         return res.status(400).send("The Product ID provided must be a number")
     }
 
-    // Get reviews by product ID
-    Product.getReviewsForProduct({
-        ...req.params
-    }, (err, data) => {
-        if (err) {
-            console.log(err)
-            res.sendStatus(500);
-        } else {
-            return res.status(200).json(data);
-        }
-    })
+    try {
+        let reviews = await Product.getReviewsForProduct({
+            ...req.params
+        }); // Get reviews for product
+
+        return res.send(reviews);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send(error);
+    }
+
 })
 
 // Upload an image for a specific product
-router.post("/:productId/image", (req, res) => {
+router.post("/:productId/image", async (req, res) => {
+
+    console.log(req.params.productId)
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.productId)) {
         return res.status(400).send("The Product ID provided must be a number")
     }
+
+    const getProduct = await Product.getProduct({
+        id: req.params.productId
+    })
+
+    if (getProduct.length == 0) {
+        return res.sendStatus(404);
+    }
+
     // Insert the page
-    upload(req, res, function (err) {
+    upload(req, res, async function (err) {
         // Error handling!
         if (err) {
-            if (err.message == "File too large") err.message += ". The limit is 1MB";
+
+            if (err.message == "File too large") {
+                return res.sendStatus(422);
+            }
             if (err.message == "Unexpected field") {
                 err.message = "'product_images' field not found OR there is a maximum limit of 5 images per product"
             }
@@ -183,6 +225,8 @@ router.post("/:productId/image", (req, res) => {
             if (err.message == "One or more files provided are not a jpeg, jpg or png file") {
                 return res.sendStatus(415)
             }
+
+            console.log(err)
             return res.status(500).send(err.message);
         } else {
 
@@ -194,119 +238,91 @@ router.post("/:productId/image", (req, res) => {
                 return res.status(400).send("There is/are no image(s) provided.")
             }
 
-            // Get all the public id of the images
-            ProductImages.getPublicId(req.params.productId, (err, data) => {
 
-                // If there is an error, send a 500 status code
-                if (err) {
-                    return res.status(500).send(err);
-                }
+            try {
 
-                // If there is data
-                if (data.length > 0) {
-                    // There are public ids for the product, so we need to delete them
-
-                    // Get all the public ids
-                    const arrayOfPublicIds = data.map(image => image.public_id);
-                    arrayOfPublicIds.forEach(async (public_id) => {
-                        try {
-
-                            // Delete the image from cloudinary
-                            let data = await Cloudinary.deleteFileFromCloudinary(public_id);
-
-                            // Logging purposes!
-                            if (data.result == "ok") {
-                                console.log("Deleted image from cloudinary")
-                            } else {
-                                console.log("Could not delete image from cloudinary")
-                            }
-                        } catch (error) {
-                            // If there is an error, send a 500 status code
-                            return res.status(500).send(error)
-                        }
-
-                    })
-                }
-
-                // After deleting the images from cloudinary, we can insert the new ones
-                // Start off by deleting all the images by product id
-                ProductImages.deleteImagesByProductId(req.params.productId, async (err, data) => {
-                    if (err) {
-                        return res.status(500).send(err);
-                    }
-
+                // Get all the public ids and delete it
+                const imagePublicIds = await ProductImages.getPublicId(req.params.productId)
+                imagePublicIds.map(image => image.public_id).forEach(async (public_id) => {
                     try {
-
-                        // We check if the product exists (before uploading), this save resources!
-                        Product.getProduct({
-                            id: req.params.productId
-                        }, async (err, product) => {
-                            if (err) {
-                                return res.status(500).send(err)
-                            } else {
-
-                                // If the product exits, we can upload the images
-                                if (product.length == 0) {
-                                    return res.status(404).send("Product not found")
-                                }
-
-                                // allImageUploaded is an array of promises
-                                // Upload all the images
-                                let allImagesUploaded = files.map(async file => {
-                                    return await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
-                                })
-
-                                // Await for all the promise to be resolved
-                                let imagesResponse = await Promise.all(allImagesUploaded);
-
-                                // Insert the images into the database
-                                ProductImages.insertProductImages({
-                                    ...req.params,
-                                    fileObjectArray: imagesResponse
-                                }, (err, data) => {
-                                    if (err) {
-                                        return res.status(500).send(err);
-                                    } else {
-                                        return res.sendStatus(204);
-                                    }
-                                })
-                            }
-                        })
-
-                    } catch (err) {
-                        return res.status(500).send(err)
+                        // Delete the image from cloudinary
+                        await Cloudinary.deleteFileFromCloudinary(public_id);
+                    } catch (error) {
+                        // If there is an error, send a 500 status code
+                        console.log(error)
+                        return res.status(500).send(error)
                     }
                 })
-            })
+
+                // After deleting the images from cloudinary, we can insert the new ones
+                // Start off by deleting all the images (in the database) by product id
+                await ProductImages.deleteImagesByProductId(req.params.productId)
+
+                try {
+
+                    // allImageUploaded is an array of promises
+                    // Upload all the images
+                    let allImagesUploaded = files.map(async file => {
+                        return await Cloudinary.uploadFileToCloudinary(file.buffer, "product_images");
+                    })
+
+                    // Await for all the promise to be resolved
+                    let imagesResponse = await Promise.all(allImagesUploaded);
+
+                    // Insert the images into the database
+                    try {
+                        await ProductImages.insertProductImages({
+                            ...req.params,
+                            fileObjectArray: imagesResponse
+                        })
+
+                        return res.sendStatus(204);
+                    } catch (error) {
+                        console.log(error)
+                        return res.status(500).send(error)
+                    }
+
+
+                } catch (err) {
+                    console.log(err)
+                    return res.status(500).send(err)
+                }
+
+
+            } catch (e) { // Catch for publicIds
+                console.log(e)
+                return res.status(500).send(e)
+            }
+
+
         }
     })
 })
 
 // Get all the images for a specific product
-router.get("/:productId/image", (req, res) => {
+router.get("/:productId/image", async (req, res) => {
 
     // Check if id is a number, otherwise send a 400 status code
     if (isNaN(req.params.productId)) {
         return res.status(400).send("The Product ID provided must be a number")
     }
 
-    // Get all the images by product id
-    ProductImages.getImageByProductId({
-        ...req.params
-    }, (err, data) => {
-        if (err) {
-            res.status(500);
+    try {
+        // Get all the images by product id
+        const images = await ProductImages.getImageByProductId({
+            ...req.params
+        })
+
+        if (images.length > 0) {
+            return res.status(200).json(images.map(image => image.url))
         } else {
-            // If there is no data, send a 404 status code
-            if (data.length > 0) {
-                res.status(200)
-                res.json(data.map(data => data.url))
-            } else {
-                // Sends back empty data
-                return res.status(200).json([])
-            }
+            return res.status(200).json([])
         }
-    })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).send(error)
+    }
+
 })
 
 module.exports = router;
