@@ -123,7 +123,7 @@ router.delete("/:id", isUserLoggedIn, async (req, res) => {
         return res.status(400).send("The Product ID provided must be a number")
     }
 
-    if (req.role !== "Admin") {
+    if (req.type !== "Admin") {
         return res.sendStatus(403);
     }
 
@@ -227,7 +227,7 @@ router.post("/:productId/image", async (req, res) => {
             }
 
             console.log(err)
-            return res.status(500).send(err.message);
+            return res.status(500).send(err);
         } else {
 
             // Files array

@@ -150,8 +150,7 @@ router.post("/users/:userid/image", isUserLoggedIn, async (req, res) => {
             if (err.message == "The file provided is not a jpeg, jpg or png file") {
                 return res.sendStatus(415)
             }
-            console.log(err)
-            return res.status(500).send(err.message);
+            return res.status(500).send(err);
         } else {
             // If there is no file, return with a status code of 400 indicating a bad request
             if (!req.file) {
