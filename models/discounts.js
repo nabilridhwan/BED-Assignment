@@ -39,7 +39,8 @@ const Discount = {
             if (err) {
                 callback(err, null);
             } else {
-                const sql = "SELECT p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price as before_discounted_price, d.discount_id, da.discount_description, da.discount_amt, da.discount_type, dd.from, dd.to FROM discounts d, discount_dates dd, discount_amount da, products p, category c WHERE d.discount_amount_id = da.discount_amount_id AND d.discount_date_id = dd.discount_date_id AND p.categoryid = c.categoryid AND d.productid = p.productid AND d.productid = ?;"
+
+                const sql = "SELECT d.discount_id, p.productid, p.name, p.price, da.discount_amt, da.discount_type, dd.`from`, dd.`to`, c.categoryid, c.category FROM discounts d, discount_dates dd, discount_amount da, products p, category c WHERE p.productid = d.productid AND d.discount_date_id = dd.discount_date_id AND d.discount_amount_id = da.discount_amount_id AND p.categoryid = c.categoryid AND p.productid = ?;"
                 dbConn.query(sql, [productid], (err, result) => {
                     dbConn.end()
 

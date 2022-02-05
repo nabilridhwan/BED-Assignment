@@ -40,6 +40,8 @@ router.post("/login", async (req, res) => {
         }
     } catch (e) {
         console.log(e)
+
+        if(e == "Invalid Password") return res.sendStatus(404)
         return res.status(500).send(e)
     }
 })

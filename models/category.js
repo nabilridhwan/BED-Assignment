@@ -65,6 +65,31 @@ const Category = {
         })
     },
 
+    searchCategoryByName: (category) => {
+            
+            return new Promise((resolve, reject) => {
+    
+                var dbConn = db.getConnection();
+                dbConn.connect(function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        const sql = `SELECT * FROM category WHERE category LIKE "%${category}%"`
+                        dbConn.query(sql, [category], (err, result) => {
+                            dbConn.end()
+    
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(result)
+                            }
+    
+                        })
+                    }
+                })
+            })
+    }
+
 }
 
 module.exports = Category;

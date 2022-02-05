@@ -76,7 +76,11 @@ router.get("/", async (req, res) => {
 })
 
 // Endpoint 7: POST /product
-router.post("/", async (req, res) => {
+router.post("/", isUserLoggedIn,async (req, res) => {
+
+    if(req.type !== "Admin"){
+        return res.sendStatus(403);
+    }
 
     try {
         // Insert the product
@@ -90,6 +94,11 @@ router.post("/", async (req, res) => {
         if (err.errno == 1062) {
             return res.status(422).send("The product name provided already exists");
         }
+
+        if(err.errno == 1048){
+            return res.sendStatus(400);
+        }
+
         return res.status(500).send(err);
     }
 
@@ -115,6 +124,25 @@ router.get("/:id", async (req, res) => {
     }
 
 })
+
+router.put("/:id", isUserLoggedIn, async (req, res) => {
+    if(isNaN(req.params.id)) {
+        return res.status(400).send("The Product ID provided must be a number");
+    }
+
+    if(req.type !== "Admin"){
+        return res.sendStatus(403);
+    }
+
+    try{
+        await Product.editProduct(req.params.id, req.body);
+        return res.sendStatus(200);
+    }catch(e){
+        return res.status(500).send(e);
+    }
+})
+
+
 // Endpoint 9: DELETE /product/:id
 router.delete("/:id", isUserLoggedIn, async (req, res) => {
 

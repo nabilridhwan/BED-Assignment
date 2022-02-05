@@ -10,6 +10,7 @@ const isUserLoggedIn = require('../auth/isUserLoggedIn');
 const router = express.Router();
 
 const Category = require("../models/category");
+const Product = require('../models/product');
 
 // Endpoint 5: POST /category
 router.post("/", isUserLoggedIn, async (req, res) => {
@@ -39,15 +40,39 @@ router.post("/", isUserLoggedIn, async (req, res) => {
 // Endpoint 6: GET /category
 router.get("/", async (req, res) => {
 
-    try {
-        // Get all categories
-        const categories = await Category.getAllCategories()
-        return res.json(categories);
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send(error)
+    if (req.query.category) {
+        try {
+            // Get all categories
+            const categories = await Category.searchCategoryByName(req.query.category)
+            return res.json(categories);
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send(error)
+        }
+    } else {
+        try {
+            // Get all categories
+            const categories = await Category.getAllCategories()
+            return res.json(categories);
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send(error)
+        }
+    }
+})
+
+router.get("/:id/products", (req, res) => {
+    if(isNaN(req.params.id)){
+        return res.status(400).send("Invalid category id")
     }
 
+    Product.getAllProductsByCategoryId(req.params.id)
+    .then(products => {
+        return res.json(products)
+    }).catch(e => {
+        console.log(e)
+        return res.status(500).send(e)
+    })
 })
 
 module.exports = router;

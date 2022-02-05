@@ -109,7 +109,7 @@ router.delete("/:discount_id", (req, res) => {
             res.sendStatus(500);
         } else {
             // If the affected rows is 0, meaning that no discount is deleted (because it isn't found), send a 404 status code
-            if(data.affectedRows == 0){
+            if (data.affectedRows == 0) {
                 return res.sendStatus(404);
             }
             res.sendStatus(204);
@@ -125,11 +125,46 @@ router.get("/:productid", (req, res) => {
         if (err) {
             return res.sendStatus(500)
         } else {
-            // If the data length is 0 (no product found), send a 404 status code
-            if (data.length == 0) {
-                return res.sendStatus(404)
+            if (data.length > 0) {
+                const d = data.map(discount => {
+                    const {
+                        discount_id,
+                        productid,
+                        name,
+                        price,
+                        discount_amt,
+                        discount_type,
+                        from,
+                        to,
+                        categoryid,
+                        category
+                    } = discount;
+
+                    // Check if the current date is after from and before to
+                    const currentDate = new Date();
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
+
+                    if (currentDate >= fromDate && currentDate <= toDate) {
+                        console.log("Within date")
+                        if (discount_type == "%") {
+                            const dOff = price * (discount_amt / 100);
+                            discount.price = price - dOff;
+                        } else {
+                            discount.price -= discount_amt;
+                        }
+
+
+                        return discount;
+                    }
+
+                })
+
+                return res.json(d.filter(d => d));
+
+            } else {
+                res.json([]);
             }
-            return res.status(200).send(data)
         }
     })
 })

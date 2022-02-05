@@ -7,7 +7,9 @@
 
 const express = require('express');
 const app = express();
-const cors = require('cors')
+const cors = require('cors');
+const morgan = require('morgan');
+const helmet = require('helmet');
 
 // Routes
 const usersRoute = require('./users.js');
@@ -16,6 +18,7 @@ const discountsRoute = require('./discounts.js');
 const interestRoute = require('./interests.js');
 const productsRoute = require('./products.js');
 const authRoute = require("./auth.js");
+const cartRoute = require("./cart.js");
 
 // Rate limiting
 // const limiter = rateLimit({
@@ -35,6 +38,8 @@ app.use(express.urlencoded({
 
 // Use cors
 app.use(cors())
+app.use(helmet())
+app.use(morgan())
 
 
 app.use("/", usersRoute);
@@ -43,5 +48,6 @@ app.use("/discount", discountsRoute);
 app.use("/interest", interestRoute);
 app.use("/product", productsRoute);
 app.use("/auth", authRoute);
+app.use("/cart", cartRoute)
 
 module.exports = app;

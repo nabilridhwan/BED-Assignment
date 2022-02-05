@@ -71,6 +71,43 @@ const Product = {
         })
     },
 
+    editProduct(productid, {
+        name,
+        description,
+        categoryid,
+        brand,
+        price
+    }) {
+
+        name = name || null;
+        description = description || null;
+        categoryid = categoryid || null;
+        brand = brand || null;
+        price = price || null;
+
+        return new Promise((resolve, reject) => {
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = "UPDATE products SET name = ?, description = ?, categoryid = ?, brand = ?, price = ? WHERE productid = ?"
+                    dbConn.query(sql, [name, description, categoryid, brand, price, productid], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result)
+                        }
+
+                    })
+                }
+            })
+        })
+
+    },
+
     getProduct: ({
         id
     }) => {
@@ -161,8 +198,33 @@ const Product = {
                 if (err) {
                     reject(err);
                 } else {
-                    const sql = 'SELECT * FROM products WHERE ' + columnName +' LIKE "%' +searchQuery+ '%"'
+                    const sql = `SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.${columnName} LIKE '%${searchQuery}%'`
                     dbConn.query(sql, [columnName], (err, result) => {
+                        dbConn.end()
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+
+                    })
+                }
+            })
+        })
+    },
+
+    getAllProductsByCategoryId: (id) => {
+        id = id || null;
+        return new Promise((resolve, reject) => {
+
+            var dbConn = db.getConnection();
+            dbConn.connect(function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const sql = `SELECT p.productid, p.name, p.description, p.categoryid, c.category as categoryname, p.brand, p.price FROM products p, category c WHERE p.categoryid = c.categoryid AND p.categoryid = ?`
+                    dbConn.query(sql, [id], (err, result) => {
                         dbConn.end()
 
                         if (err) {

@@ -1,5 +1,5 @@
 Instructions
-1. Import Database Data from the `DB_DUMP` folder under the schema name `sp_it`.
+1. Import Database Data from the `DB_DUMP_ASSIGNMENT_2` folder under the schema name `sp_it`.
 
 2. Run `npm install` on the root directory of this project to install the dependencies of the project.
 

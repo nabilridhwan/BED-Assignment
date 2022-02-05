@@ -27,12 +27,20 @@ router.post("/:userid", isUserLoggedIn, async (req, res) => {
         // Clear all the interests
         await Interest.clearInterestByUserId(req.params.userid);
 
-        // Insert the interest
-        await Interest.insertInterests({
-            ...req.params,
-            ...req.body
-        })
 
+        // Do a check if there is categoryids (because if none, then categoryids will be empty, hence don't need to update)
+        if (req.body.categoryids) {
+            console.log("Category id found")
+
+            // Insert the interest
+            await Interest.insertInterests({
+                ...req.params,
+                ...req.body
+            })
+
+        } else {
+            console.log("Category id not found, Only remove everything")
+        }
         return res.sendStatus(201);
     } catch (e) {
         console.log(e)
@@ -42,30 +50,17 @@ router.post("/:userid", isUserLoggedIn, async (req, res) => {
 
 })
 
-router.get("/", async (req, res) => {
+router.get("/", isUserLoggedIn, async (req, res) => {
 
-    try {
-        // Get all interests
-        const interests = await Interest.getAllInterests();
-        return res.send(interests)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send(error)
+    if(!req.userid){
+        return res.sendStatus(403);
     }
-})
 
-router.get("/:userid", async (req, res) => {
-    // TODO: Verification of userid
     // Check if userid is a number, otherwise, send a 400 status code
-    if (isNaN(req.params.userid)) {
-        return res.status(400).send("The User ID provided must be a number")
-    }
-
     // Get interest by ID
-
     try {
         const interests = await Interest.getInterestsById({
-            ...req.params
+            userid: req.userid
         })
         return res.json(interests)
     } catch (error) {

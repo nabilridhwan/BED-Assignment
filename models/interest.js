@@ -44,7 +44,7 @@ const Interest = {
                 if (err) {
                     reject(err);
                 } else {
-                    const sql = "SELECT u.userid, u.username, u.email, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
+                    const sql = "SELECT u.userid, u.username, c.categoryid, c.category from interest i, users u, category c WHERE i.userid = u.userid AND i.categoryid = c.categoryid AND u.userid = ?;"
                     dbConn.query(sql, [userid], (err, result) => {
 
                         dbConn.end();

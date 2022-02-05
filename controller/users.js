@@ -62,11 +62,7 @@ router.get("/users", async (req, res) => {
 })
 
 // Endpoint 3: GET /users/:id
-router.get("/users/:id", isUserLoggedIn, async (req, res) => {
-
-    if (req.userid != req.params.id) {
-        return res.sendStatus(403);
-    }
+router.get("/users/:id", async (req, res) => {
 
     // check if the id is a number
     if (isNaN(req.params.id)) {
@@ -85,7 +81,6 @@ router.get("/users/:id", isUserLoggedIn, async (req, res) => {
     }
 
 })
-
 
 // Endpoint 4: PUT /users/:id
 router.put("/users/:id", isUserLoggedIn, async (req, res) => {

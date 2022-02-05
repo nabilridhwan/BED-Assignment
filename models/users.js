@@ -6,6 +6,10 @@
 */
 
 const db = require('../config/db');
+const {
+    generateHash,
+    verifyPassword
+} = require('../utils/password')
 
 const userDB = {
     getAllUsers: () => {
@@ -44,7 +48,7 @@ const userDB = {
                 if (err) {
                     reject(err);
                 } else {
-                    const sql = "SELECT * FROM users WHERE userid = ?"
+                    const sql = "SELECT userid, username, email, contact, type, profile_pic_url, created_at FROM users WHERE userid = ?"
                     dbConn.query(sql, [id], (err, result) => {
 
                         dbConn.end()
@@ -83,16 +87,21 @@ const userDB = {
                 if (err) {
                     reject(err);
                 } else {
-                    const sql = "INSERT INTO users(email, contact, password, type, profile_pic_url, username) VALUES(?,?,?,?,?,?)"
-                    dbConn.query(sql, [email, contact, password, type, profile_pic_url, username], (err, result) => {
 
-                        dbConn.end()
+                    generateHash(password).then(hash => {
+                        const sql = "INSERT INTO users(email, contact, password, type, profile_pic_url, username) VALUES(?,?,?,?,?,?)"
+                        dbConn.query(sql, [email, contact, hash, type, profile_pic_url, username], (err, result) => {
 
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(result);
-                        }
+                            dbConn.end()
+
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(result);
+                            }
+                        })
+                    }).catch(e => {
+                        reject(e);
                     })
                 }
             })
@@ -121,17 +130,40 @@ const userDB = {
                 if (err) {
                     reject(err);
                 } else {
-                    const sql = "UPDATE users SET password = ?, email = ?, contact = ?, type = ?, username = ? WHERE userid = ?"
-                    dbConn.query(sql, [password, email, contact, type, username, id], (err, result) => {
 
-                        dbConn.end()
+                    if (password) {
+                        generateHash(password).then(hash => {
 
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(result)
-                        }
-                    })
+                            const sql = "UPDATE users SET password = ?, email = ?, contact = ?, type = ?, username = ? WHERE userid = ?"
+                            dbConn.query(sql, [hash, email, contact, type, username, id], (err, result) => {
+
+                                dbConn.end()
+
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(result)
+                                }
+                            })
+
+                        }).catch(e => {
+                            reject(e);
+                        })
+                    } else {
+                        const sql = "UPDATE users SET email = ?, contact = ?, type = ?, username = ? WHERE userid = ?"
+                        dbConn.query(sql, [email, contact, type, username, id], (err, result) => {
+
+                            dbConn.end()
+
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(result)
+                            }
+                        })
+                    }
+
+
                 }
             })
         })
@@ -177,14 +209,37 @@ const userDB = {
                 if (err) {
                     callback(err, null);
                 } else {
-                    const sql = "SELECT userid, type FROM users WHERE email = ? AND password = ?"
+                    const sql = "SELECT userid, type, password FROM users WHERE email = ?"
                     dbConn.query(sql, [email, password], (err, result) => {
+
                         dbConn.end()
+
                         if (err) {
-                            reject(err)
-                        } else {
-                            resolve(result)
+                            reject(err);
                         }
+
+                        if (result.length > 0) {
+                            // Check if the password matches
+                            verifyPassword(password, result[0].password).then(isMatch => {
+                                if (isMatch) {
+                                    const {
+                                        userid,
+                                        type
+                                    } = result[0];
+                                    resolve([{
+                                        userid,
+                                        type
+                                    }]);
+                                } else {
+                                    reject("Invalid Password")
+                                }
+                            }).catch(e => {
+                                reject(e);
+                            })
+                        } else {
+                            reject("No user found")
+                        }
+
                     })
                 }
             })
